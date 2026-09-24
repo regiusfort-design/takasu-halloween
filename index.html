@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>高洲ハロウィン運営</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap&text=0123456789%2B%E9%AB%98%E6%B4%B2%E5%9C%B0%E5%8C%BA%E3%83%8F%E3%83%AD%E3%82%A6%E3%82%A3%E3%83%B3%E9%81%8B%E5%96%B6%E3%82%A2%E3%83%97%E3%83%AA%E5%8F%97%E4%BB%98%E4%BA%BA">
+<style>
+/* 夜の屋外で使う前提の、暗い単一テーマ */
+:root{
+  color-scheme: dark;
+  --bg:#15111C; --surface:#201929; --surface-2:#2B2236; --line:#3A2F48;
+  --text:#F4EDE3; --muted:#A89CB6; --faint:#766A88;
+  --pumpkin:#FF8A1F; --pumpkin-ink:#1C0E02; --pumpkin-soft:rgba(255,138,31,.16);
+  --moon:#C8B6FF; --moon-ink:#160F2A; --moon-soft:rgba(200,182,255,.16);
+  --ok:#5ED39B; --bad:#FF5E6E;
+  --display:"Dela Gothic One","Hiragino Sans","Noto Sans JP",sans-serif;
+  --ui:system-ui,-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.5 var(--ui);-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--moon);outline-offset:2px}
+
+.app{height:100%;display:flex;flex-direction:column;max-width:640px;margin:0 auto}
+
+/* ヘッダー */
+.top{flex:none;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;border-bottom:1px solid var(--line)}
+.ev{font-size:12px;color:var(--muted);letter-spacing:.06em;display:flex;align-items:center;gap:6px}
+.ev svg{width:15px;height:15px}
+.tag{font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--moon-ink);background:var(--moon);border-radius:4px;padding:0 5px}
+.tot{display:flex;align-items:baseline;gap:6px;margin-top:2px}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums;font-weight:400}
+.tot .num{font-size:42px;line-height:1.05;color:var(--pumpkin)}
+.tot .unit{font-size:13px;color:var(--muted)}
+.bump{animation:bump .3s ease-out}
+@keyframes bump{40%{transform:scale(1.12)}}
+.top-r{display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-size:13px;color:var(--muted);min-width:0}
+.split b{color:var(--text);font-variant-numeric:tabular-nums;margin-left:3px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.dot.k{background:var(--pumpkin)} .dot.a{background:var(--moon)}
+.me{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 8px;font-size:12px;max-width:160px;margin-top:3px}
+.me .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.net{width:8px;height:8px;border-radius:50%;background:var(--faint);flex:none}
+.net.ok{background:var(--ok)} .net.bad{background:var(--bad)}
+
+/* 画面 */
+.views{flex:1;min-height:0;position:relative}
+.view{position:absolute;inset:0;display:flex;flex-direction:column}
+.scroll{flex:1;min-height:0;overflow-y:auto;padding:14px 16px 20px;-webkit-overflow-scrolling:touch}
+
+/* 受付 */
+.hint{font-size:13px;color:var(--muted);margin:0 0 10px}
+.hint .k{color:var(--pumpkin);font-weight:700} .hint .a{color:var(--moon);font-weight:700}
+.rows{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 84px 84px;gap:8px;align-items:center;padding:9px 9px 9px 14px}
+.row + .row{border-top:1px solid var(--line)}
+.row.other{background:rgba(255,255,255,.025)}
+.row.other .short{color:var(--muted)}
+.short{font-weight:700;font-size:15px;line-height:1.3;word-break:keep-all;overflow-wrap:anywhere}
+.gc{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:2px}
+.gc .k{color:var(--pumpkin)} .gc .a{color:var(--moon)}
+.tap{position:relative;height:58px;border:0;border-radius:12px;font-weight:800;font-size:15px;touch-action:manipulation;transition:transform .08s;user-select:none;-webkit-user-select:none}
+.tap.k{background:var(--pumpkin);color:var(--pumpkin-ink)}
+.tap.a{background:var(--moon);color:var(--moon-ink)}
+.tap:active{transform:scale(.93)}
+.fly{position:absolute;left:50%;top:2px;font-family:var(--display);font-size:15px;pointer-events:none;animation:fly .6s ease-out forwards}
+@keyframes fly{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-22px)}}
+.dock{flex:none;display:flex;align-items:center;gap:12px;padding:10px 16px 12px;border-top:1px solid var(--line);background:var(--bg)}
+.undo{flex:1;min-width:0;height:44px;border-radius:10px;background:transparent;border:1px solid var(--line);font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;padding:0 12px}
+.undo small{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis}
+.undo:disabled{opacity:.4;cursor:default}
+.sync{flex:none;font-size:12px;color:var(--muted);text-align:right;max-width:42%;line-height:1.3;white-space:pre-line}
+.sync.warn{color:var(--pumpkin)}
+
+/* 状況 */
+.sum{display:grid;gap:10px;padding:2px 0 6px}
+.sum-n{display:flex;align-items:baseline;gap:8px}
+.sum-n .num{font-size:60px;line-height:1}
+.sum-n span{color:var(--muted)}
+.stack{height:12px;border-radius:6px;background:var(--surface-2);display:flex;overflow:hidden}
+.stack i{display:block;height:100%;transition:width .4s ease}
+.stack .k{background:var(--pumpkin)} .stack .a{background:var(--moon)}
+.legend{display:flex;gap:18px;font-size:13px;color:var(--muted)}
+.legend b{color:var(--text);font-variant-numeric:tabular-nums;margin-left:3px}
+h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:24px 0 4px}
+.gbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 14px;padding:9px 0;border-bottom:1px solid var(--line)}
+.gbar .nm{font-size:14px;font-weight:600}
+.gbar .v{grid-row:span 2;align-self:center;text-align:right}
+.gbar .v .num{font-size:22px;line-height:1}
+.gbar .v small{display:block;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.gbar .stack{height:8px;border-radius:4px}
+.feed{list-style:none;margin:0;padding:0}
+.feed li{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.feed time{color:var(--muted);font-variant-numeric:tabular-nums;font-size:13px}
+.feed .g{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.feed .who{display:block;color:var(--faint);font-size:12px}
+.pill{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.pill.k{background:var(--pumpkin-soft);color:var(--pumpkin)} .pill.a{background:var(--moon-soft);color:var(--moon)}
+.none{color:var(--faint);font-size:13px;padding:10px 0}
+.note{font-size:12px;color:var(--faint);margin:18px 0 0}
+
+/* 連絡（チャット） */
+.msgs{flex:1;min-height:0;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:3px}
+.msg{display:flex;flex-direction:column;max-width:82%;align-self:flex-start}
+.msg.mine{align-self:flex-end;align-items:flex-end}
+.msg .from{font-size:12px;color:var(--muted);margin:10px 0 2px 4px}
+.msg.cont-gap{margin-top:8px}
+.line{display:flex;align-items:flex-end;gap:6px}
+.msg.mine .line{flex-direction:row-reverse}
+.bubble{background:var(--surface-2);padding:8px 12px;border-radius:16px 16px 16px 4px;white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.45}
+.msg.mine .bubble{background:var(--pumpkin);color:var(--pumpkin-ink);border-radius:16px 16px 4px 16px}
+.msg .t{flex:none;font-size:10px;color:var(--faint);padding-bottom:2px;font-variant-numeric:tabular-nums}
+.msg.failed .bubble{opacity:.55}
+.msg .st{font-size:11px;color:var(--bad);margin-top:2px;background:none;border:0;padding:0;text-decoration:underline}
+.msg .st.wait{color:var(--faint);text-decoration:none}
+.empty{margin:auto;text-align:center;color:var(--muted);font-size:14px;max-width:22em;line-height:1.7}
+.chips{flex:none;display:flex;gap:6px;overflow-x:auto;padding:8px 16px 0;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13px}
+.composer{flex:none;display:flex;gap:8px;padding:8px 16px 10px}
+.composer input{flex:1;min-width:0;height:44px;border-radius:22px;border:1px solid var(--line);background:var(--surface);padding:0 16px;font-size:16px}
+.composer input::placeholder{color:var(--faint)}
+.composer button{flex:none;height:44px;border:0;border-radius:22px;background:var(--pumpkin);color:var(--pumpkin-ink);font-weight:800;padding:0 18px}
+.composer button:disabled{opacity:.4}
+
+/* タブ */
+.tabs{flex:none;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:var(--surface);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs button{position:relative;background:none;border:0;padding:7px 0 9px;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:12px;color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--pumpkin)}
+.tabs svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.badge{position:absolute;top:3px;left:calc(50% + 7px);min-width:18px;height:18px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px}
+
+/* お知らせ・トースト */
+.banner{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 8px);max-width:616px;margin:0 auto;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:10px 14px;box-shadow:0 10px 30px rgba(0,0,0,.5);display:flex;gap:10px;align-items:baseline;z-index:20;animation:drop .25s ease-out;text-align:left;width:auto}
+.banner b{flex:none;color:var(--pumpkin);font-size:13px}
+.banner span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+@keyframes drop{from{transform:translateY(-12px);opacity:0}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 132px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:30;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+
+/* 初回設定 */
+.setup{position:fixed;inset:0;background:var(--bg);z-index:40;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.setup-card{width:100%;max-width:360px;display:flex;flex-direction:column;gap:8px}
+.setup h1{font-family:var(--display);font-weight:400;font-size:34px;line-height:1.1;margin:2px 0 18px;color:var(--pumpkin)}
+.setup label{font-size:13px;color:var(--muted);margin-top:6px}
+.setup input{height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:0 14px;font-size:16px}
+.setup .help{font-size:12px;color:var(--faint);margin:0}
+.primary{height:52px;border:0;border-radius:12px;background:var(--pumpkin);color:var(--pumpkin-ink);font-weight:800;font-size:16px;margin-top:14px}
+.primary:disabled{opacity:.5}
+.err{color:var(--bad);font-size:13px;margin:4px 0 0}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div>
+      <div class="ev">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7.5c-4.6 0-8 2.5-8 6.3S7.4 20.5 12 20.5s8-2.9 8-6.7-3.4-6.3-8-6.3z" fill="#FF8A1F"/><path d="M12 7.5V5.2c0-.9.7-1.7 1.7-1.7" fill="none" stroke="#5ED39B" stroke-width="1.8" stroke-linecap="round"/><path d="M9 12.5l1.2 1.3M15 12.5l-1.2 1.3M9.5 16.5c1.6 1 3.4 1 5 0" fill="none" stroke="#1C0E02" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>高洲地区ハロウィン</span>
+        <span id="demoTag" class="tag" hidden>デモ</span>
+      </div>
+      <div class="tot"><span id="totalNum" class="num">0</span><span class="unit">人 受付済</span></div>
+    </div>
+    <div class="top-r">
+      <div class="split"><span class="dot k"></span>子ども<b id="kidsNum">0</b></div>
+      <div class="split"><span class="dot a"></span>大人<b id="adultsNum">0</b></div>
+      <button id="meBtn" class="me" type="button" aria-label="名前を変更"><span id="netDot" class="net"></span><span id="meName" class="nm">—</span></button>
+    </div>
+  </header>
+
+  <main class="views">
+    <section id="v-reception" class="view" aria-label="受付">
+      <div class="scroll">
+        <p class="hint">住んでいる自治会の <span class="k">子ども</span> か <span class="a">大人</span> を、1人につき1回タップ</p>
+        <div id="rows" class="rows"></div>
+      </div>
+      <div class="dock">
+        <button id="undoBtn" class="undo" type="button" disabled><span>直前を取り消す</span><small id="undoWhat"></small></button>
+        <span id="syncState" class="sync"></span>
+      </div>
+    </section>
+
+    <section id="v-status" class="view" aria-label="状況" hidden>
+      <div class="scroll">
+        <div class="sum">
+          <div class="sum-n"><span id="sTotal" class="num">0</span><span>人 受付済</span></div>
+          <div class="stack"><i id="sStackK" class="k"></i><i id="sStackA" class="a"></i></div>
+          <div class="legend"><span><span class="dot k"></span>子ども<b id="sKids">0</b></span><span><span class="dot a"></span>大人<b id="sAdults">0</b></span></div>
+        </div>
+        <h2>自治会別</h2>
+        <div id="groupBars"></div>
+        <h2>最近の受付</h2>
+        <ol id="feed" class="feed"></ol>
+        <p class="note">詳しい集計（時間帯別など）は、スプレッドシートの「集計」シートで確認できます。</p>
+      </div>
+    </section>
+
+    <section id="v-chat" class="view" aria-label="連絡" hidden>
+      <div id="msgList" class="msgs"></div>
+      <div id="chips" class="chips"></div>
+      <form id="composer" class="composer" autocomplete="off">
+        <input id="msgInput" maxlength="300" placeholder="スタッフ全員に送る" enterkeyhint="send">
+        <button id="sendBtn" type="submit">送信</button>
+      </form>
+    </section>
+  </main>
+
+  <nav class="tabs" role="tablist">
+    <button type="button" role="tab" data-tab="reception"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16v3.2a2.3 2.3 0 0 0 0 4.6v3.2H4v-3.2a2.3 2.3 0 0 0 0-4.6z"/><path d="M9.5 12l1.8 1.8 3.3-3.6"/></svg>受付</button>
+    <button type="button" role="tab" data-tab="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-5"/></svg>状況</button>
+    <button type="button" role="tab" data-tab="chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v11H10l-4.5 3.5v-3.5H4z"/></svg>連絡<span id="badge" class="badge" hidden>0</span></button>
+  </nav>
+</div>
+
+<button id="banner" class="banner" type="button" hidden><b id="bName"></b><span id="bText"></span></button>
+<div id="toast" class="toast" role="status" hidden></div>
+
+<div id="setup" class="setup" hidden>
+  <form id="setupForm" class="setup-card" autocomplete="off">
+    <div class="ev">高洲地区ハロウィン</div>
+    <h1>運営アプリ</h1>
+    <label for="nameIn">あなたの名前・係</label>
+    <input id="nameIn" maxlength="20" placeholder="例：受付 山田">
+    <p class="help">メッセージの送信者名と、受付の記録に使います。</p>
+    <div id="passWrap" style="display:flex;flex-direction:column;gap:8px">
+      <label for="passIn">合言葉</label>
+      <input id="passIn" type="password" autocomplete="off">
+    </div>
+    <p id="setupErr" class="err" hidden></p>
+    <button id="setupBtn" type="submit" class="primary">はじめる</button>
+    <button id="setupCancel" type="button" class="undo" style="flex:none" hidden>キャンセル</button>
+  </form>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+// ★ Apps Script のウェブアプリ URL（末尾 /exec）。画面を GitHub Pages などに置くときに設定する
+const API_URL = 'https://script.google.com/macros/s/AKfycbxsEiYnJUobRh9I8afsevcEgM9Q1rtRDA0IYAez0xwmCfVS0YI-nhmi0338IetMNSoB/exec';
+
+const HAS_GAS = !!(window.google && google.script && google.script.run);
+// デモモードはパソコンで index.html を直接開いたときだけ。本番では絶対に使わない
+const DEMO = !HAS_GAS && !API_URL && /^(file|data):$/.test(location.protocol);
+const TYPE_LABEL = { k: '子ども', a: '大人' };
+const QUICK = ['了解です', '受付が混んでいます', 'お菓子の補充お願いします', '迷子の対応中です', '本部に来てください'];
+
+// ---------- 端末内の保存（この端末だけ） ----------
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('thw_' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('thw_' + k, JSON.stringify(v)); } catch (e) {} },
+};
+const uid = () => 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+const S = {
+  cfg: null, groups: [], gmap: {}, rowEls: {}, barEls: {},
+  me: store.get('me', null),
+  dev: store.get('dev', null),
+  server: { ver: 0, counts: {}, recent: [] },
+  pend: store.get('pend', []),     // まだ送っていないタップ（まとめ中）
+  queue: store.get('queue', []),   // 送信待ちの操作（順番に送る）
+  undo: store.get('undo', []),     // この端末で受付した順番
+  inflight: null,
+  msgs: [], seqSet: new Set(), lastSeq: 0, seenSeq: store.get('seenSeq', 0), out: [],
+  tab: store.get('tab', 'reception'),
+  lastOk: 0, netDown: false, authBad: false, booted: false,
+  pollGen: 0, pollTimer: null, flushTimer: null, retryDelay: 1000,
+};
+if (!S.dev) { S.dev = uid(); store.set('dev', S.dev); }
+function save() { store.set('pend', S.pend); store.set('queue', S.queue); store.set('undo', S.undo); }
+
+// ---------- DOM ヘルパー ----------
+const $ = s => document.querySelector(s);
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  if (props) for (const k in props) {
+    const v = props[k];
+    if (k === 'class') el.className = v;
+    else if (k === 'text') el.textContent = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v);
+  }
+  kids.flat().forEach(c => { if (c != null && c !== false) el.append(c instanceof Node ? c : document.createTextNode(String(c))); });
+  return el;
+}
+const hhmm = ts => { const d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+
+// ---------- サーバー呼び出し ----------
+function call(fn, ...args) {
+  if (DEMO) return Mock[fn](...args);
+  if (HAS_GAS) {
+    return new Promise((resolve, reject) => {
+      google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn](...args);
+    });
+  }
+  return callApi(fn, args);
+}
+
+// Cookie を送らない（credentials: 'omit'）ので、Google アカウントのログイン状態に左右されない
+async function callApi(fn, args) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 25000);
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ fn, args }),
+      credentials: 'omit',
+      redirect: 'follow',
+      cache: 'no-store',
+      signal: ctrl.signal,
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'エラーが発生しました');
+    return data.result;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+const msgOf = e => (e && e.message) || String(e || '');
+const isApp = e => msgOf(e).indexOf('[APP]') >= 0;
+const isAuth = e => isApp(e) && /合言葉/.test(msgOf(e));
+const errText = e => msgOf(e).replace(/^.*\[APP\]\s*/, '');
+const auth = () => ({ name: S.me ? S.me.name : '', pass: S.me ? S.me.pass : '', dev: S.dev });
+
+function setNet(ok) {
+  S.netDown = !ok;
+  if (ok) S.lastOk = Date.now();
+  renderNet(); renderDock();
+}
+function renderNet() {
+  const ok = !S.netDown && Date.now() - S.lastOk < 12000;
+  $('#netDot').className = 'net ' + (S.lastOk ? (ok ? 'ok' : 'bad') : '');
+  $('#netDot').title = ok ? '接続中' : '接続を確認中';
+}
+
+// ---------- 人数の計算 ----------
+function effective() {
+  const c = {};
+  S.groups.forEach(g => { c[g.key] = { k: 0, a: 0 }; });
+  const add = (g, t, n) => { if (c[g] && (t === 'k' || t === 'a')) c[g][t] += n; };
+  const sc = S.server.counts || {};
+  Object.keys(sc).forEach(g => { add(g, 'k', sc[g].k || 0); add(g, 'a', sc[g].a || 0); });
+  S.pend.forEach(e => add(e.g, e.t, e.n));
+  S.queue.forEach(op => {
+    if (op.kind === 'rec') op.items.forEach(e => add(e.g, e.t, e.n));
+    else if (op.kind === 'undo') add(op.g, op.t, -1);
+  });
+  Object.values(c).forEach(v => { v.k = Math.max(0, v.k); v.a = Math.max(0, v.a); });
+  return c;
+}
+function totals(c) { let k = 0, a = 0; Object.values(c).forEach(v => { k += v.k; a += v.a; }); return { k, a, all: k + a }; }
+function applyState(st) { if (st && st.counts && st.ver >= S.server.ver) S.server = st; }
+
+// ---------- 受付タップ ----------
+function tap(g, t, btn) {
+  const now = Date.now();
+  let e = S.pend.find(x => x.g === g && x.t === t && now - x.ts < 2500);
+  if (e) e.n++;
+  else { e = { id: uid(), g, t, n: 1, ts: now }; S.pend.push(e); }
+  S.undo.push({ id: e.id, g, t });
+  if (S.undo.length > 40) S.undo.shift();
+  save();
+  scheduleFlush();
+  renderCounts(true);
+  const fly = h('span', { class: 'fly' }, '+1');
+  btn.append(fly); setTimeout(() => fly.remove(), 650);
+  try { navigator.vibrate && navigator.vibrate(12); } catch (err) {}
+}
+
+// 連続タップは少しまとめてから送る（最大2秒待ち）
+function scheduleFlush() {
+  clearTimeout(S.flushTimer);
+  const oldest = Math.min(...S.pend.map(e => e.ts));
+  const wait = Math.max(0, Math.min(700, oldest + 2000 - Date.now()));
+  S.flushTimer = setTimeout(flush, wait);
+}
+function flush() {
+  if (!S.pend.length) return;
+  S.queue.push({ kind: 'rec', items: S.pend });
+  S.pend = [];
+  save(); pump();
+}
+
+// 送信待ちの操作を1つずつ順番に送る
+async function pump() {
+  if (S.inflight || S.authBad || !S.me) return;
+  while (S.queue.length) {
+    const op = S.queue[0];
+    S.inflight = op;
+    try {
+      const st = op.kind === 'rec' ? await call('record', auth(), op.items) : await call('undo', auth(), op.id);
+      S.queue = S.queue.filter(x => x !== op);
+      save(); applyState(st); S.retryDelay = 1000; setNet(true);
+    } catch (e) {
+      if (isAuth(e)) { S.inflight = null; showSetup(errText(e)); break; }
+      if (isApp(e)) {
+        S.queue = S.queue.filter(x => x !== op); save(); toast(errText(e));
+      } else {
+        setNet(false);
+        S.inflight = null;
+        setTimeout(pump, S.retryDelay);
+        S.retryDelay = Math.min(S.retryDelay * 2, 15000);
+        break;
+      }
+    }
+    S.inflight = null;
+  }
+  S.inflight = null;
+  renderCounts();
+}
+
+function doUndo() {
+  const u = S.undo.pop();
+  if (!u) return;
+  let done = false;
+  const p = S.pend.find(e => e.id === u.id);
+  if (p) {
+    p.n--; if (p.n <= 0) S.pend = S.pend.filter(e => e !== p);
+    done = true;
+  }
+  if (!done) {
+    for (const op of S.queue) {
+      if (op === S.inflight || op.kind !== 'rec') continue;
+      const it = op.items.find(e => e.id === u.id);
+      if (it) { it.n--; if (it.n <= 0) op.items = op.items.filter(e => e !== it); done = true; break; }
+    }
+    S.queue = S.queue.filter(op => op === S.inflight || op.kind !== 'rec' || op.items.length);
+  }
+  if (!done) S.queue.push({ kind: 'undo', id: u.id, g: u.g, t: u.t });
+  save(); renderCounts();
+  const g = S.gmap[u.g];
+  toast((g ? g.short : '') + '　' + TYPE_LABEL[u.t] + 'を1名取り消しました');
+  pump();
+}
+
+// ---------- 定期更新 ----------
+function kickPoll() { clearTimeout(S.pollTimer); const gen = ++S.pollGen; poll(gen); }
+async function poll(gen) {
+  if (!S.me || S.authBad) return;
+  try {
+    const r = await call('sync', auth(), S.lastSeq);
+    setNet(true);
+    if (!S.inflight && !S.queue.length) applyState(r.state);
+    addMsgs(r.msgs);
+    if (!S.booted) {
+      S.booted = true;
+      if (S.seenSeq > S.lastSeq) { S.seenSeq = S.lastSeq; store.set('seenSeq', S.seenSeq); }
+      renderBadge();
+    }
+    renderCounts();
+    if (S.queue.length && !S.inflight) pump();
+  } catch (e) {
+    if (isAuth(e)) { showSetup(errText(e)); return; }
+    setNet(false);
+  } finally {
+    if (gen === S.pollGen && !S.authBad) S.pollTimer = setTimeout(() => poll(gen), document.hidden ? 15000 : 3000);
+  }
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S.me) kickPoll(); });
+
+// ---------- 描画：人数 ----------
+function buildGroups() {
+  const rows = $('#rows'), bars = $('#groupBars');
+  rows.textContent = ''; bars.textContent = '';
+  S.groups.forEach(g => {
+    const ck = h('span', { class: 'k' }), ca = h('span', { class: 'a' });
+    const bk = h('button', { class: 'tap k', type: 'button', 'aria-label': g.name + '　子ども1名' }, '子ども');
+    const ba = h('button', { class: 'tap a', type: 'button', 'aria-label': g.name + '　大人1名' }, '大人');
+    bk.addEventListener('click', () => tap(g.key, 'k', bk));
+    ba.addEventListener('click', () => tap(g.key, 'a', ba));
+    rows.append(h('div', { class: 'row' + (g.key === 'other' ? ' other' : '') },
+      h('div', null, h('div', { class: 'short', text: g.short }), h('div', { class: 'gc' }, ck, '　', ca)),
+      bk, ba));
+    S.rowEls[g.key] = { ck, ca };
+
+    const iK = h('i', { class: 'k' }), iA = h('i', { class: 'a' });
+    const num = h('span', { class: 'num' }, '0'), sub = h('small');
+    bars.append(h('div', { class: 'gbar' },
+      h('div', { class: 'nm', text: g.name }),
+      h('div', { class: 'v' }, num, sub),
+      h('div', { class: 'stack' }, iK, iA)));
+    S.barEls[g.key] = { iK, iA, num, sub };
+  });
+}
+
+let lastTotal = null;
+function renderCounts(fromTap) {
+  if (!S.groups.length) return;
+  const c = effective(), t = totals(c);
+  const tn = $('#totalNum');
+  if (lastTotal !== null && t.all !== lastTotal && !fromTap) { tn.classList.remove('bump'); void tn.offsetWidth; tn.classList.add('bump'); }
+  lastTotal = t.all;
+  tn.textContent = t.all;
+  $('#kidsNum').textContent = t.k;
+  $('#adultsNum').textContent = t.a;
+  $('#sTotal').textContent = t.all;
+  $('#sKids').textContent = t.k;
+  $('#sAdults').textContent = t.a;
+  $('#sStackK').style.width = (t.all ? t.k / t.all * 100 : 0) + '%';
+  $('#sStackA').style.width = (t.all ? t.a / t.all * 100 : 0) + '%';
+  const max = Math.max(1, ...S.groups.map(g => c[g.key].k + c[g.key].a));
+  S.groups.forEach(g => {
+    const v = c[g.key], r = S.rowEls[g.key], b = S.barEls[g.key];
+    r.ck.textContent = '子ども ' + v.k;
+    r.ca.textContent = '大人 ' + v.a;
+    b.num.textContent = v.k + v.a;
+    b.sub.textContent = '子ども' + v.k + '・大人' + v.a;
+    b.iK.style.width = (v.k / max * 100) + '%';
+    b.iA.style.width = (v.a / max * 100) + '%';
+  });
+  renderFeed(); renderDock();
+}
+
+function renderFeed() {
+  const feed = $('#feed');
+  feed.textContent = '';
+  const list = (S.server.recent || []).filter(e => e.n > 0).slice(-10).reverse();
+  if (!list.length) { feed.append(h('li', { class: 'none' }, 'まだ受付はありません')); return; }
+  list.forEach(e => {
+    const g = S.gmap[e.g];
+    feed.append(h('li', null,
+      h('time', { text: hhmm(e.ts) }),
+      h('div', { class: 'g' }, g ? g.short : e.g, h('span', { class: 'who', text: e.staff || '' })),
+      h('span', { class: 'pill ' + e.t, text: TYPE_LABEL[e.t] + ' ' + e.n + '名' })));
+  });
+}
+
+function renderDock() {
+  const u = S.undo[S.undo.length - 1];
+  $('#undoBtn').disabled = !u;
+  $('#undoWhat').textContent = u ? ((S.gmap[u.g] ? S.gmap[u.g].short : '') + ' ' + TYPE_LABEL[u.t]) : '';
+  const n = S.pend.reduce((s, e) => s + e.n, 0)
+    + S.queue.reduce((s, op) => s + (op.kind === 'rec' ? op.items.reduce((x, e) => x + e.n, 0) : 1), 0);
+  const el = $('#syncState');
+  if (n > 0) { el.textContent = S.netDown ? '未送信 ' + n + '件\n再接続中…' : '送信中 ' + n + '件'; el.className = 'sync warn'; }
+  else { el.textContent = S.lastOk ? '全員に反映済み' : '接続中…'; el.className = 'sync'; }
+}
+
+// ---------- 連絡（チャット） ----------
+function addMsgs(list) {
+  let changed = false, latest = null;
+  (list || []).forEach(m => {
+    if (S.seqSet.has(m.seq)) return;
+    S.seqSet.add(m.seq); S.msgs.push(m); changed = true;
+    if (m.cid) S.out = S.out.filter(o => o.cid !== m.cid);
+    if (m.seq > S.lastSeq) S.lastSeq = m.seq;
+    if (S.booted && m.dev !== S.dev) latest = m;
+  });
+  if (!changed) return;
+  S.msgs.sort((a, b) => a.seq - b.seq);
+  if (S.tab === 'chat' && !document.hidden) markSeen();
+  else if (latest) showBanner(latest);
+  renderChat(); renderBadge();
+}
+
+function renderChat(forceBottom) {
+  const list = $('#msgList');
+  const near = list.scrollHeight - list.scrollTop - list.clientHeight < 100;
+  list.textContent = '';
+  if (!S.msgs.length && !S.out.length) {
+    list.append(h('p', { class: 'empty' }, 'まだメッセージはありません。', h('br'), 'ここに書くと、スタッフ全員に届きます。'));
+    return;
+  }
+  let prev = null;
+  S.msgs.forEach(m => {
+    const mine = m.dev === S.dev;
+    const key = m.dev + '|' + m.name;
+    const el = h('div', { class: 'msg' + (mine ? ' mine' : '') + (mine && prev !== key ? ' cont-gap' : '') });
+    if (!mine && prev !== key) el.append(h('div', { class: 'from', text: m.name }));
+    el.append(h('div', { class: 'line' }, h('div', { class: 'bubble', text: m.text }), h('span', { class: 't', text: hhmm(m.ts) })));
+    list.append(el);
+    prev = key;
+  });
+  S.out.forEach(o => {
+    const el = h('div', { class: 'msg mine' + (o.status === 'failed' ? ' failed' : '') });
+    el.append(h('div', { class: 'line' }, h('div', { class: 'bubble', text: o.text })));
+    if (o.status === 'failed') {
+      const b = h('button', { class: 'st', type: 'button' }, '送信できませんでした。タップで再送');
+      b.addEventListener('click', () => sendOut(o));
+      el.append(b);
+    } else el.append(h('span', { class: 'st wait' }, '送信中…'));
+    list.append(el);
+  });
+  if (forceBottom || near) list.scrollTop = list.scrollHeight;
+}
+
+function unreadCount() { return S.msgs.filter(m => m.seq > S.seenSeq && m.dev !== S.dev).length; }
+function renderBadge() {
+  const n = unreadCount(), b = $('#badge');
+  b.hidden = !n || S.tab === 'chat';
+  b.textContent = n > 99 ? '99+' : n;
+}
+function markSeen() { S.seenSeq = S.lastSeq; store.set('seenSeq', S.seenSeq); renderBadge(); }
+
+async function sendOut(o) {
+  o.status = 'sending'; renderChat(true);
+  try {
+    const r = await call('postMessage', auth(), o.text, o.cid);
+    S.out = S.out.filter(x => x !== o);
+    addMsgs([r.msg]);
+    setNet(true);
+    renderChat(true);
+  } catch (e) {
+    if (isAuth(e)) showSetup(errText(e));
+    else if (isApp(e)) { S.out = S.out.filter(x => x !== o); toast(errText(e)); }
+    else o.status = 'failed';
+    renderChat();
+  }
+}
+
+let bannerTimer = null;
+function showBanner(m) {
+  $('#bName').textContent = m.name;
+  $('#bText').textContent = m.text;
+  $('#banner').hidden = false;
+  clearTimeout(bannerTimer);
+  bannerTimer = setTimeout(() => { $('#banner').hidden = true; }, 6000);
+}
+
+let toastTimer = null;
+function toast(text) {
+  const t = $('#toast');
+  t.textContent = text; t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 2200);
+}
+
+// ---------- タブ ----------
+function setTab(tab) {
+  if (!['reception', 'status', 'chat'].includes(tab)) tab = 'reception';
+  S.tab = tab; store.set('tab', tab);
+  ['reception', 'status', 'chat'].forEach(t => { $('#v-' + t).hidden = t !== tab; });
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+  if (tab === 'chat') { $('#banner').hidden = true; markSeen(); renderChat(true); }
+  renderBadge();
+}
+
+// ---------- 名前・合言葉 ----------
+function showSetup(err) {
+  S.authBad = !!err;
+  $('#nameIn').value = S.me ? S.me.name : '';
+  $('#passIn').value = '';
+  $('#passWrap').hidden = !(S.cfg && S.cfg.needPass);
+  const e = $('#setupErr');
+  e.hidden = !err; e.textContent = err || '';
+  $('#setupCancel').hidden = !!err || !(S.me && S.me.name);
+  $('#setup').hidden = false;
+  setTimeout(() => $(S.me && S.me.name && S.cfg && S.cfg.needPass ? '#passIn' : '#nameIn').focus(), 50);
+}
+
+async function onSetup(ev) {
+  ev.preventDefault();
+  const name = $('#nameIn').value.replace(/\s+/g, ' ').trim().slice(0, 20);
+  const pass = $('#passIn').value.trim();
+  const err = $('#setupErr');
+  if (!name) { err.textContent = '名前か係名を入力してください'; err.hidden = false; return; }
+  const prev = S.me;
+  S.me = { name, pass };
+  const btn = $('#setupBtn');
+  btn.disabled = true; btn.textContent = '確認中…';
+  try {
+    await call('sync', auth(), 0);
+    store.set('me', S.me);
+    S.authBad = false;
+    $('#setup').hidden = true;
+    start();
+  } catch (e) {
+    S.me = prev;
+    err.textContent = isAuth(e) ? errText(e) : '接続できませんでした。電波の良い場所でもう一度お試しください。';
+    err.hidden = false;
+  } finally {
+    btn.disabled = false; btn.textContent = 'はじめる';
+  }
+}
+
+function start() {
+  $('#meName').textContent = S.me.name;
+  kickPoll();
+  pump();
+  if (S.pend.length) scheduleFlush();
+}
+
+// ---------- 起動 ----------
+async function boot() {
+  $('#demoTag').hidden = !DEMO;
+  if (!HAS_GAS && !DEMO && !API_URL) {
+    const card = $('#setupForm');
+    card.textContent = '';
+    card.append(h('div', { class: 'ev' }, '高洲地区ハロウィン'), h('h1', null, '運営アプリ'),
+      h('p', { class: 'err' }, '接続先が設定されていません。配布された URL から開いてください。'));
+    $('#setup').hidden = false;
+    return;
+  }
+  document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+  $('#undoBtn').addEventListener('click', doUndo);
+  $('#meBtn').addEventListener('click', () => showSetup());
+  $('#banner').addEventListener('click', () => setTab('chat'));
+  $('#setupForm').addEventListener('submit', onSetup);
+  $('#setupCancel').addEventListener('click', () => { $('#setup').hidden = true; });
+  $('#composer').addEventListener('submit', ev => {
+    ev.preventDefault();
+    const inp = $('#msgInput');
+    const text = inp.value.trim();
+    if (!text) return;
+    inp.value = '';
+    const o = { cid: uid(), text, status: 'sending' };
+    S.out.push(o);
+    sendOut(o);
+  });
+  const chips = $('#chips');
+  QUICK.forEach(q => {
+    const c = h('button', { class: 'chip', type: 'button', text: q });
+    c.addEventListener('click', () => { const i = $('#msgInput'); i.value = i.value ? i.value + ' ' + q : q; i.focus(); });
+    chips.append(c);
+  });
+  setInterval(renderNet, 2000);
+
+  for (;;) {
+    try { S.cfg = await call('getConfig'); break; }
+    catch (e) { toast('読み込みに失敗しました。再試行しています…'); await new Promise(r => setTimeout(r, 3000)); }
+  }
+  S.groups = S.cfg.groups || [];
+  S.groups.forEach(g => { S.gmap[g.key] = g; });
+  buildGroups();
+  setTab(S.tab);
+  renderCounts();
+  renderChat(true);
+  if (!S.me || !S.me.name || (S.cfg.needPass && !S.me.pass)) showSetup();
+  else start();
+}
+
+// ---------- デモ用（Apps Script の外で開いたときだけ使う。データはこの端末のみ） ----------
+const Mock = (function () {
+  const GROUPS = [
+    { key: 'shion', short: '潮音の街', name: '潮音の街自治会' },
+    { key: 'radiant', short: 'ラディアンコースト', name: 'ラディアンコースト新浦安自治会' },
+    { key: 'moana', short: 'モアナヴィラ', name: 'モアナヴィラ新浦安自治会' },
+    { key: 'proud', short: 'プラウド新浦安', name: 'プラウド新浦安自治会' },
+    { key: 'palm', short: 'プラウド パームコート', name: 'プラウド新浦安パームコート自治会' },
+    { key: 'stage', short: 'パークハウス ステージ', name: 'ザ・パークハウスステージ新浦安自治会' },
+    { key: 'marine', short: 'パークハウス マリンヴィラ', name: 'ザ・パークハウス新浦安マリンヴィラ自治会' },
+    { key: 'regias', short: 'レジアスフォート', name: 'レジアスフォート新浦安自治会' },
+    { key: 'other', short: 'その他・地区外', name: 'その他・地区外' },
+  ];
+  let db = store.get('demo_db', null);
+  const persist = () => store.set('demo_db', db);
+  if (!db) {
+    const now = Date.now();
+    db = { ver: now, rows: [], msgs: [], seen: {} };
+    [['moana', 'k', 3, '受付A', 18], ['regias', 'k', 2, '受付A', 16], ['regias', 'a', 1, '受付A', 16],
+     ['shion', 'k', 4, '受付B', 12], ['proud', 'k', 1, '受付B', 9], ['proud', 'a', 2, '受付B', 9],
+     ['stage', 'k', 2, '受付A', 6], ['marine', 'k', 3, '受付A', 4], ['radiant', 'k', 2, '受付B', 3],
+     ['palm', 'k', 1, '受付A', 2], ['other', 'k', 1, '受付B', 1]]
+      .forEach(([g, t, n, staff, min]) => db.rows.push({ id: uid(), ts: now - min * 60000, g, t, n, staff }));
+    db.msgs.push({ seq: 1, ts: now - 15 * 60000, name: '本部', text: '受付開始しました。混雑したら連絡ください。', dev: 'demo-hq' });
+    db.msgs.push({ seq: 2, ts: now - 7 * 60000, name: 'お菓子係', text: '第2ポイントのお菓子、残り半分です。', dev: 'demo-candy' });
+    db.msgs.push({ seq: 3, ts: now - 5 * 60000, name: '本部', text: '了解です。補充を持っていきます。', dev: 'demo-hq' });
+    persist();
+  }
+  const wait = () => new Promise(r => setTimeout(r, 200 + Math.random() * 300));
+  function state() {
+    const counts = {};
+    GROUPS.forEach(g => { counts[g.key] = { k: 0, a: 0 }; });
+    db.rows.forEach(r => { if (counts[r.g]) counts[r.g][r.t] += r.n; });
+    return { ver: db.ver, counts, recent: db.rows.slice(-15) };
+  }
+  const bump = () => { db.ver = Math.max(Date.now(), db.ver + 1); };
+  return {
+    async getConfig() { await wait(); return { eventName: '高洲地区ハロウィン', needPass: false, groups: GROUPS }; },
+    async sync(a, last) { await wait(); db = store.get('demo_db', db); return { state: state(), msgs: db.msgs.filter(m => m.seq > last) }; },
+    async record(a, items) {
+      await wait();
+      items.forEach(it => { if (db.seen[it.id]) return; db.seen[it.id] = 1; db.rows.push({ id: it.id, ts: Date.now(), g: it.g, t: it.t, n: it.n, staff: a.name }); });
+      bump(); persist(); return state();
+    },
+    async undo(a, id) {
+      await wait();
+      const r = db.rows.find(x => x.id === id);
+      if (!r) throw new Error('[APP] 取り消す受付が見つかりません');
+      if (r.n > 0) r.n--;
+      bump(); persist(); return state();
+    },
+    async postMessage(a, text, cid) {
+      await wait();
+      const m = { seq: db.msgs.length + 1, ts: Date.now(), name: a.name, text, dev: a.dev, cid };
+      db.msgs.push(m); persist(); return { msg: m };
+    },
+  };
+})();
+
+boot();
+})();
+</script>
+</body>
+</html>
