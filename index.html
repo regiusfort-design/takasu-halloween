@@ -24,7 +24,7 @@
   --text:#F4EDE3; --muted:#A89CB6; --faint:#766A88;
   --pumpkin:#FF8A1F; --pumpkin-ink:#1C0E02; --pumpkin-soft:rgba(255,138,31,.16);
   --moon:#C8B6FF; --moon-ink:#160F2A; --moon-soft:rgba(200,182,255,.16);
-  --ok:#5ED39B; --bad:#FF5E6E; --bad-soft:rgba(255,94,110,.14);
+  --ok:#5ED39B; --ok-soft:rgba(94,211,155,.14); --bad:#FF5E6E; --bad-soft:rgba(255,94,110,.14);
   --display:"Dela Gothic One","Hiragino Sans","Noto Sans JP",sans-serif;
   --ui:system-ui,-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;
 }
@@ -88,6 +88,24 @@ button{cursor:pointer}
 .undo:disabled{opacity:.4;cursor:default}
 .sync{flex:none;font-size:12px;color:var(--muted);text-align:right;line-height:1.3;white-space:pre-line}
 .sync.warn{color:var(--pumpkin)}
+
+/* 受付の状態 */
+.phase{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;border-radius:4px;padding:0 6px;line-height:1.7;white-space:nowrap}
+.phase.before{background:var(--surface-2);color:var(--muted)}
+.phase.open{background:var(--ok-soft);color:var(--ok)}
+.phase.closed{background:var(--bad-soft);color:var(--bad)}
+.recvbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;border-radius:12px;padding:12px 14px;margin:0 0 12px;font-size:13px;line-height:1.5;color:var(--muted)}
+.recvbar b{display:block;font-size:15px;color:var(--text)}
+.recvbar.before{background:var(--surface-2)}
+.recvbar.closed{background:var(--bad-soft)}
+.recvbar.closed b{color:var(--bad)}
+.recvbar.open{background:var(--ok-soft);color:var(--ok);padding:8px 14px;font-weight:700}
+.recvbar button{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:12px;color:var(--text)}
+.row .closedLbl{display:none;grid-column:2 / 4;height:58px;border-radius:12px;border:1px dashed var(--line);color:var(--muted);font-size:13px;font-weight:700;align-items:center;justify-content:center;text-align:center;line-height:1.3}
+.row.closed .tap{display:none}
+.row.closed .closedLbl{display:flex}
+.row.closed .short{color:var(--muted)}
+.endtag{font-size:11px;font-weight:700;color:var(--bad);margin-left:6px;white-space:nowrap}
 
 /* マイナスモード */
 .mbtn{flex:none;height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;padding:0 14px;font-size:14px;font-weight:700;white-space:nowrap}
@@ -192,6 +210,16 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
 .confirm-row{display:flex;gap:8px}
 .confirm-row .undo{flex:1;height:48px}
 .ok-msg{color:var(--ok);font-size:13px;margin:4px 0 0}
+.phase-now{display:flex;align-items:center;gap:8px;font-size:14px;margin:0 0 10px}
+.phase-now .phase{font-size:12px}
+.phase-now small{color:var(--muted);font-size:12px}
+#phaseBtn{width:100%;margin-top:0}
+.grp-ctl .gr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.grp-ctl .gr small{display:block;color:var(--muted);font-size:11px}
+.grp-ctl .gr.is-closed small{color:var(--bad)}
+.grp-ctl button{flex:none;min-width:72px;height:38px;border-radius:10px;font-size:13px;font-weight:700;border:1px solid var(--bad);color:var(--bad);background:transparent}
+.grp-ctl button.reopen{border-color:var(--line);color:var(--text)}
+.grp-ctl button:disabled,#phaseBtn:disabled{opacity:.5}
 
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -206,6 +234,7 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7.5c-4.6 0-8 2.5-8 6.3S7.4 20.5 12 20.5s8-2.9 8-6.7-3.4-6.3-8-6.3z" fill="#FF8A1F"/><path d="M12 7.5V5.2c0-.9.7-1.7 1.7-1.7" fill="none" stroke="#5ED39B" stroke-width="1.8" stroke-linecap="round"/><path d="M9 12.5l1.2 1.3M15 12.5l-1.2 1.3M9.5 16.5c1.6 1 3.4 1 5 0" fill="none" stroke="#1C0E02" stroke-width="1.4" stroke-linecap="round"/></svg>
         <span>高洲地区ハロウィン</span>
         <span id="demoTag" class="tag" hidden>デモ</span>
+        <span id="phasePill" class="phase" hidden></span>
       </div>
       <div class="tot"><span id="totalNum" class="num">0</span><span class="unit">人 受付済</span></div>
     </div>
@@ -219,6 +248,7 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
   <main class="views">
     <section id="v-reception" class="view" aria-label="受付">
       <div class="scroll">
+        <div id="recvBar" class="recvbar" hidden></div>
         <div class="hintbar">
           <p class="hint">住んでいる自治会の <span class="k">子ども</span> か <span class="a">大人</span> を、1人につき1回タップ</p>
           <span id="syncState" class="sync"></span>
@@ -259,8 +289,8 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
   </main>
 
   <nav class="tabs" role="tablist">
-    <button type="button" role="tab" data-tab="reception"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16v3.2a2.3 2.3 0 0 0 0 4.6v3.2H4v-3.2a2.3 2.3 0 0 0 0-4.6z"/><path d="M9.5 12l1.8 1.8 3.3-3.6"/></svg>受付</button>
     <button type="button" role="tab" data-tab="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-5"/></svg>状況</button>
+    <button type="button" role="tab" data-tab="reception"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16v3.2a2.3 2.3 0 0 0 0 4.6v3.2H4v-3.2a2.3 2.3 0 0 0 0-4.6z"/><path d="M9.5 12l1.8 1.8 3.3-3.6"/></svg>受付</button>
     <button type="button" role="tab" data-tab="chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v11H10l-4.5 3.5v-3.5H4z"/></svg>連絡<span id="badge" class="badge" hidden>0</span></button>
   </nav>
 </div>
@@ -298,6 +328,23 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
     </form>
 
     <div id="admBody" hidden>
+      <p id="admErr" class="err" hidden></p>
+
+      <h2>受付の開始・終了</h2>
+      <div class="phase-now">いまの状態 <span id="admPhase" class="phase"></span><small id="admPhaseTime"></small></div>
+      <button id="phaseBtn" class="primary" type="button">受付を開始する</button>
+      <div id="closeConfirm" class="confirm" hidden>
+        <p><b>受付を終了しますか？</b><br>全スタッフの受付ボタンが押せなくなります。あとで再開もできます。</p>
+        <div class="confirm-row">
+          <button id="closeNo" class="undo" type="button">やめる</button>
+          <button id="closeYes" class="danger" type="button">終了する</button>
+        </div>
+      </div>
+
+      <h2>自治会ごとの終了</h2>
+      <p class="help" style="margin:0 0 4px">その自治会だけ受付ボタンを押せなくします。「再開」で元に戻せます。</p>
+      <div id="grpCtl" class="grp-ctl"></div>
+
       <h2>CSVで保存</h2>
       <div class="adm-list">
         <button class="adm-btn" type="button" data-kind="summary">自治会別の集計<small>自治会ごとの子ども・大人・合計</small></button>
@@ -316,7 +363,6 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
           <button id="clearYes" class="danger" type="button">削除する</button>
         </div>
       </div>
-      <p id="admErr" class="err" hidden></p>
     </div>
   </div>
 </div>
@@ -351,7 +397,7 @@ const S = {
   undo: store.get('undo', []),     // この端末で受付した順番
   inflight: null,
   msgs: [], seqSet: new Set(), lastSeq: 0, seenSeq: store.get('seenSeq', 0), out: [],
-  tab: store.get('tab', 'reception'),
+  tab: store.get('tab', 'status'), // 受付は担当者だけが使うので、最初は「状況」を開く
   lastOk: 0, netDown: false, authBad: false, booted: false,
   pollGen: 0, pollTimer: null, flushTimer: null, retryDelay: 1000,
   epoch: store.get('epoch', null), // データクリアの番号
@@ -446,7 +492,50 @@ function totals(c) { let k = 0, a = 0; Object.values(c).forEach(v => { k += v.k;
 function applyState(st) {
   if (!st || !st.counts) return;
   checkEpoch(st.epoch);
-  if (st.ver >= S.server.ver) S.server = st;
+  if (st.ver >= S.server.ver) { S.server = st; S.gotState = true; }
+}
+
+// ---------- 受付の開始・終了 ----------
+// null = まだ読み込み中。サーバーが古い版（受付状態なし）のときは常に受付中として扱う
+function recvInfo() {
+  if (!S.gotState) return null;
+  return S.server.recv || { phase: 'open', groupsClosed: {}, legacy: true };
+}
+function groupClosedAt(g) { const r = recvInfo(); return r && r.groupsClosed ? r.groupsClosed[g] || null : null; }
+function acceptsPlus(g) {
+  const r = recvInfo();
+  return !!r && r.phase === 'open' && !groupClosedAt(g);
+}
+function plusBlockedReason(g) {
+  const r = recvInfo();
+  if (!r) return '接続中です。少し待ってからタップしてください';
+  if (r.phase === 'before') return 'まだ受付開始前です';
+  if (r.phase === 'closed') return '受付は終了しました';
+  if (groupClosedAt(g)) return (S.gmap[g] ? S.gmap[g].short : '') + ' は受付終了しています';
+  return '';
+}
+
+function renderRecv() {
+  const r = recvInfo();
+  const pill = $('#phasePill'), bar = $('#recvBar');
+  if (!r || r.legacy) { pill.hidden = true; bar.hidden = true; return; }
+  const label = { before: '受付前', open: '受付中', closed: '受付終了' }[r.phase];
+  pill.className = 'phase ' + r.phase; pill.textContent = label; pill.hidden = false;
+  const sig = JSON.stringify(r);
+  if (bar.dataset.sig === sig) return;
+  bar.dataset.sig = sig;
+  bar.className = 'recvbar ' + r.phase;
+  bar.textContent = '';
+  if (r.phase === 'before') {
+    bar.append(h('div', null, h('b', null, '受付開始前です'), '本部が「受付開始」を押すと入力できます'),
+      h('button', { type: 'button', onclick: openAdmin }, '本部用：開始する'));
+  } else if (r.phase === 'open') {
+    const n = Object.keys(r.groupsClosed || {}).length;
+    bar.append(h('span', null, '● 受付中' + (r.openedAt ? '（' + hhmm(r.openedAt) + ' 開始）' : '') + (n ? '　終了した自治会 ' + n : '')));
+  } else {
+    bar.append(h('div', null, h('b', null, '受付は終了しました'), r.closedAt ? hhmm(r.closedAt) + ' 終了' : ''),
+      h('button', { type: 'button', onclick: openAdmin }, '本部用：再開する'));
+  }
 }
 
 // 管理者がデータをクリアしたら、この端末の履歴も消す
@@ -469,6 +558,7 @@ function checkEpoch(epoch) {
 // ---------- 受付タップ ----------
 function tap(g, t, btn) {
   const s = S.minus ? -1 : 1;
+  if (s > 0 && !acceptsPlus(g)) { toast(plusBlockedReason(g)); return; }
   if (s < 0) {
     if (effective()[g][t] <= 0) { toast('0人なので減らせません'); return; }
     armMinusTimer();
@@ -533,6 +623,7 @@ async function pump() {
       const st = op.kind === 'rec' ? await call('record', auth(), op.items) : await call('undo', auth(), op.id);
       S.queue = S.queue.filter(x => x !== op);
       save(); applyState(st); S.retryDelay = 1000; setNet(true);
+      if (st && st.rejected) toast('受付時間外のため ' + st.rejected + '名分は記録されませんでした');
     } catch (e) {
       if (isAuth(e)) { S.inflight = null; showSetup(errText(e)); break; }
       if (isApp(e)) {
@@ -620,18 +711,21 @@ function buildGroups() {
     const ba = h('button', { class: 'tap a', type: 'button', 'aria-label': g.name + '　大人' }, la);
     bk.addEventListener('click', () => tap(g.key, 'k', bk));
     ba.addEventListener('click', () => tap(g.key, 'a', ba));
-    rows.append(h('div', { class: 'row' + (g.key === 'other' ? ' other' : '') },
+    const cl = h('div', { class: 'closedLbl' });
+    const row = h('div', { class: 'row' + (g.key === 'other' ? ' other' : '') },
       h('div', null, h('div', { class: 'short', text: g.short }), h('div', { class: 'gc' }, ck, '　', ca)),
-      bk, ba));
-    S.rowEls[g.key] = { ck, ca, bk, ba, lk, la };
+      bk, ba, cl);
+    rows.append(row);
+    S.rowEls[g.key] = { row, ck, ca, bk, ba, lk, la, cl };
 
     const iK = h('i', { class: 'k' }), iA = h('i', { class: 'a' });
     const num = h('span', { class: 'num' }, '0'), sub = h('small');
+    const tag = h('span', { class: 'endtag' });
     bars.append(h('div', { class: 'gbar' },
-      h('div', { class: 'nm', text: g.name }),
+      h('div', { class: 'nm' }, g.name, tag),
       h('div', { class: 'v' }, num, sub),
       h('div', { class: 'stack' }, iK, iA)));
-    S.barEls[g.key] = { iK, iA, num, sub };
+    S.barEls[g.key] = { iK, iA, num, sub, tag };
   });
 }
 
@@ -655,14 +749,18 @@ function renderCounts(fromTap) {
     const v = c[g.key], r = S.rowEls[g.key], b = S.barEls[g.key];
     r.ck.textContent = '子ども ' + v.k;
     r.ca.textContent = '大人 ' + v.a;
-    r.bk.disabled = S.minus && v.k <= 0;
-    r.ba.disabled = S.minus && v.a <= 0;
+    const ok = acceptsPlus(g.key), closedAt = groupClosedAt(g.key);
+    r.bk.disabled = S.minus ? v.k <= 0 : !ok;
+    r.ba.disabled = S.minus ? v.a <= 0 : !ok;
+    r.row.classList.toggle('closed', !S.minus && !!closedAt);
+    r.cl.textContent = closedAt ? '受付終了（' + hhmm(closedAt) + '）' : '';
+    b.tag.textContent = closedAt ? '終了' : '';
     b.num.textContent = v.k + v.a;
     b.sub.textContent = '子ども' + v.k + '・大人' + v.a;
     b.iK.style.width = (v.k / max * 100) + '%';
     b.iA.style.width = (v.a / max * 100) + '%';
   });
-  renderFeed(); renderDock();
+  renderFeed(); renderDock(); renderRecv(); renderAdminRecv();
 }
 
 function renderFeed() {
@@ -789,12 +887,72 @@ function openAdmin() {
   $('#admCsvMsg').hidden = true;
   $('#clearConfirm').hidden = true;
   $('#clearBtn').hidden = false;
+  $('#closeConfirm').hidden = true;
   const unlocked = !!S.adminPass;
   $('#admLock').hidden = unlocked;
   $('#admBody').hidden = !unlocked;
   if (!unlocked) { $('#admPass').value = ''; setTimeout(() => $('#admPass').focus(), 50); }
+  S.admSig = null;
+  renderAdminRecv();
 }
 function closeAdmin() { $('#admin').hidden = true; }
+
+// 管理メニュー：受付の開始・終了
+function renderAdminRecv() {
+  if ($('#admin').hidden || $('#admBody').hidden) return;
+  const r = recvInfo() || { phase: 'before', groupsClosed: {} };
+  const sig = JSON.stringify(r) + '|' + !!S.admBusy + '|' + !$('#closeConfirm').hidden;
+  if (S.admSig === sig) return; // 3秒ごとの更新で作り直すと押しにくいので、変化したときだけ描き直す
+  S.admSig = sig;
+  const ph = $('#admPhase');
+  ph.className = 'phase ' + r.phase;
+  ph.textContent = { before: '受付前', open: '受付中', closed: '受付終了' }[r.phase];
+  $('#admPhaseTime').textContent =
+    (r.openedAt ? hhmm(r.openedAt) + ' 開始' : '') + (r.phase === 'closed' && r.closedAt ? '・' + hhmm(r.closedAt) + ' 終了' : '');
+  const btn = $('#phaseBtn');
+  btn.disabled = !!S.admBusy;
+  btn.hidden = !$('#closeConfirm').hidden;
+  if (r.phase === 'open') { btn.className = 'danger-outline'; btn.textContent = '受付を終了する…'; }
+  else { btn.className = 'primary'; btn.textContent = r.phase === 'closed' ? '受付を再開する' : '受付を開始する'; }
+
+  const box = $('#grpCtl');
+  box.textContent = '';
+  S.groups.forEach(g => {
+    const at = r.groupsClosed && r.groupsClosed[g.key];
+    const b = h('button', { type: 'button', class: at ? 'reopen' : '' }, at ? '再開' : '終了');
+    b.disabled = !!S.admBusy;
+    b.addEventListener('click', () => recvAction(at ? 'openGroup' : 'closeGroup', g.key));
+    box.append(h('div', { class: 'gr' + (at ? ' is-closed' : '') },
+      h('div', null, g.short, h('small', null, at ? '受付終了（' + hhmm(at) + '）' : '受付できます')), b));
+  });
+}
+
+async function recvAction(action, g) {
+  const err = $('#admErr');
+  err.hidden = true;
+  S.admBusy = true; renderAdminRecv();
+  try {
+    const st = await call('adminReception', auth(), S.adminPass, action, g);
+    applyState(st);
+    $('#closeConfirm').hidden = true;
+    const grp = g && S.gmap[g] ? S.gmap[g].short + ' の' : '';
+    toast({ open: '受付を開始しました', close: '受付を終了しました',
+      closeGroup: grp + '受付を終了しました', openGroup: grp + '受付を再開しました' }[action]);
+    kickPoll(); // 自動のお知らせメッセージをすぐ取り込む
+  } catch (e) {
+    if (isApp(e) && /管理パスワード/.test(msgOf(e))) S.adminPass = null;
+    admError(e, err);
+  } finally {
+    S.admBusy = false;
+    renderCounts();
+  }
+}
+
+function onPhaseBtn() {
+  const r = recvInfo() || { phase: 'before' };
+  if (r.phase === 'open') { $('#closeConfirm').hidden = false; renderAdminRecv(); }
+  else recvAction('open');
+}
 
 function admError(e, el) {
   if (isAuth(e)) { closeAdmin(); showSetup(errText(e)); return; }
@@ -879,7 +1037,7 @@ async function onClear() {
 
 // ---------- タブ ----------
 function setTab(tab) {
-  if (!['reception', 'status', 'chat'].includes(tab)) tab = 'reception';
+  if (!['reception', 'status', 'chat'].includes(tab)) tab = 'status';
   if (tab !== 'reception' && S.minus) setMinus(false);
   S.tab = tab; store.set('tab', tab);
   ['reception', 'status', 'chat'].forEach(t => { $('#v-' + t).hidden = t !== tab; });
@@ -954,6 +1112,9 @@ async function boot() {
   $('#clearBtn').addEventListener('click', () => { $('#clearBtn').hidden = true; $('#clearConfirm').hidden = false; $('#admCsvMsg').hidden = true; });
   $('#clearNo').addEventListener('click', () => { $('#clearConfirm').hidden = true; $('#clearBtn').hidden = false; });
   $('#clearYes').addEventListener('click', onClear);
+  $('#phaseBtn').addEventListener('click', onPhaseBtn);
+  $('#closeNo').addEventListener('click', () => { $('#closeConfirm').hidden = true; renderAdminRecv(); });
+  $('#closeYes').addEventListener('click', () => recvAction('close'));
   $('#meBtn').addEventListener('click', () => showSetup());
   $('#banner').addEventListener('click', () => setTab('chat'));
   $('#setupForm').addEventListener('submit', onSetup);
@@ -1023,8 +1184,10 @@ const Mock = (function () {
     const counts = {};
     GROUPS.forEach(g => { counts[g.key] = { k: 0, a: 0 }; });
     db.rows.forEach(r => { if (counts[r.g]) counts[r.g][r.t] += r.n; });
-    return { ver: db.ver, epoch: db.epoch || '0', counts, recent: db.rows.slice(-15) };
+    if (!db.recv) db.recv = { phase: 'open', openedAt: Date.now() - 20 * 60000, closedAt: null, groupsClosed: {} };
+    return { ver: db.ver, epoch: db.epoch || '0', recv: db.recv, counts, recent: db.rows.slice(-15) };
   }
+  const accepts = g => db.recv && db.recv.phase === 'open' && !db.recv.groupsClosed[g];
   // デモモードの管理パスワードは admin
   const admin = p => { if (p !== 'admin') throw new Error('[APP] 管理パスワードが違います（デモは admin）'); };
   const fmt = ts => { const d = new Date(ts); return d.toLocaleDateString('ja-JP') + ' ' + d.toLocaleTimeString('ja-JP'); };
@@ -1034,8 +1197,14 @@ const Mock = (function () {
     async sync(a, last) { await wait(); db = store.get('demo_db', db); return { state: state(), epoch: db.epoch || '0', msgs: db.msgs.filter(m => m.seq > last) }; },
     async record(a, items) {
       await wait();
-      items.forEach(it => { if (db.seen[it.id]) return; db.seen[it.id] = 1; db.rows.push({ id: it.id, ts: Date.now(), g: it.g, t: it.t, n: it.n, staff: a.name }); });
-      bump(); persist(); return state();
+      state();
+      let rejected = 0;
+      items.forEach(it => {
+        if (db.seen[it.id]) return;
+        if (it.n > 0 && !accepts(it.g)) { rejected += it.n; return; }
+        db.seen[it.id] = 1; db.rows.push({ id: it.id, ts: Date.now(), g: it.g, t: it.t, n: it.n, staff: a.name });
+      });
+      bump(); persist(); return Object.assign(state(), { rejected });
     },
     async undo(a, id) {
       await wait();
@@ -1067,7 +1236,20 @@ const Mock = (function () {
     },
     async adminClear(a, p) {
       await wait(); admin(p);
-      db.rows = []; db.msgs = []; db.epoch = String(Date.now()); bump(); persist(); return state();
+      db.rows = []; db.msgs = []; db.epoch = String(Date.now());
+      db.recv = { phase: 'before', openedAt: null, closedAt: null, groupsClosed: {} };
+      bump(); persist(); return state();
+    },
+    async adminReception(a, p, action, g) {
+      await wait(); admin(p); state();
+      const r = db.recv, now = Date.now(), grp = GROUPS.find(x => x.key === g);
+      let text;
+      if (action === 'open') { text = r.phase === 'closed' ? '受付を再開しました' : '受付を開始しました'; r.phase = 'open'; r.openedAt = r.openedAt || now; r.closedAt = null; }
+      else if (action === 'close') { r.phase = 'closed'; r.closedAt = now; text = '受付を終了しました'; }
+      else if (action === 'closeGroup') { r.groupsClosed[g] = now; text = grp.short + ' の受付を終了しました'; }
+      else { delete r.groupsClosed[g]; text = grp.short + ' の受付を再開しました'; }
+      db.msgs.push({ seq: db.msgs.length + 1, ts: now, name: '本部（自動）', text: '【お知らせ】' + text + '（' + a.name + '）', dev: 'system' });
+      bump(); persist(); return state();
     },
   };
 })();
