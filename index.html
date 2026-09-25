@@ -4,6 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>高洲ハロウィン運営</title>
+<!-- ホーム画面のアイコン（GitHub Pages に icon-*.png・apple-touch-icon.png・manifest.json も置く） -->
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#15111C">
+<meta name="apple-mobile-web-app-title" content="高洲ハロウィン">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap&text=0123456789%2B%E9%AB%98%E6%B4%B2%E5%9C%B0%E5%8C%BA%E3%83%8F%E3%83%AD%E3%82%A6%E3%82%A3%E3%83%B3%E9%81%8B%E5%96%B6%E3%82%A2%E3%83%97%E3%83%AA%E5%8F%97%E4%BB%98%E4%BA%BA">
@@ -15,7 +24,7 @@
   --text:#F4EDE3; --muted:#A89CB6; --faint:#766A88;
   --pumpkin:#FF8A1F; --pumpkin-ink:#1C0E02; --pumpkin-soft:rgba(255,138,31,.16);
   --moon:#C8B6FF; --moon-ink:#160F2A; --moon-soft:rgba(200,182,255,.16);
-  --ok:#5ED39B; --bad:#FF5E6E;
+  --ok:#5ED39B; --bad:#FF5E6E; --bad-soft:rgba(255,94,110,.14);
   --display:"Dela Gothic One","Hiragino Sans","Noto Sans JP",sans-serif;
   --ui:system-ui,-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;
 }
@@ -71,12 +80,23 @@ button{cursor:pointer}
 .tap:active{transform:scale(.93)}
 .fly{position:absolute;left:50%;top:2px;font-family:var(--display);font-size:15px;pointer-events:none;animation:fly .6s ease-out forwards}
 @keyframes fly{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-22px)}}
-.dock{flex:none;display:flex;align-items:center;gap:12px;padding:10px 16px 12px;border-top:1px solid var(--line);background:var(--bg)}
+.hintbar{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 0 10px}
+.hintbar .hint{margin:0}
+.dock{flex:none;display:flex;align-items:center;gap:8px;padding:10px 16px 12px;border-top:1px solid var(--line);background:var(--bg)}
 .undo{flex:1;min-width:0;height:44px;border-radius:10px;background:transparent;border:1px solid var(--line);font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;padding:0 12px}
 .undo small{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis}
 .undo:disabled{opacity:.4;cursor:default}
-.sync{flex:none;font-size:12px;color:var(--muted);text-align:right;max-width:42%;line-height:1.3;white-space:pre-line}
+.sync{flex:none;font-size:12px;color:var(--muted);text-align:right;line-height:1.3;white-space:pre-line}
 .sync.warn{color:var(--pumpkin)}
+
+/* マイナスモード */
+.mbtn{flex:none;height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;padding:0 14px;font-size:14px;font-weight:700;white-space:nowrap}
+.mbtn[aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:#fff}
+.minusbar{display:flex;align-items:center;gap:8px;background:var(--bad-soft);color:var(--bad);border-radius:10px;padding:9px 12px;font-size:13px;font-weight:700;margin:0 0 10px;line-height:1.4}
+.minus-on .tap.k{background:transparent;color:var(--pumpkin);box-shadow:inset 0 0 0 2px var(--pumpkin)}
+.minus-on .tap.a{background:transparent;color:var(--moon);box-shadow:inset 0 0 0 2px var(--moon)}
+.minus-on .rows{border-color:var(--bad)}
+.tap:disabled{opacity:.3;cursor:default;transform:none}
 
 /* 状況 */
 .sum{display:grid;gap:10px;padding:2px 0 6px}
@@ -144,8 +164,8 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 132px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:30;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
 
 /* 初回設定 */
-.setup{position:fixed;inset:0;background:var(--bg);z-index:40;display:flex;align-items:center;justify-content:center;padding:24px 16px}
-.setup-card{width:100%;max-width:360px;display:flex;flex-direction:column;gap:8px}
+.setup{position:fixed;inset:0;background:var(--bg);z-index:40;display:flex;overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 24px) 16px calc(env(safe-area-inset-bottom,0px) + 24px)}
+.setup-card{width:100%;max-width:360px;display:flex;flex-direction:column;gap:8px;margin:auto}
 .setup h1{font-family:var(--display);font-weight:400;font-size:34px;line-height:1.1;margin:2px 0 18px;color:var(--pumpkin)}
 .setup label{font-size:13px;color:var(--muted);margin-top:6px}
 .setup input{height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:0 14px;font-size:16px}
@@ -153,6 +173,25 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
 .primary{height:52px;border:0;border-radius:12px;background:var(--pumpkin);color:var(--pumpkin-ink);font-weight:800;font-size:16px;margin-top:14px}
 .primary:disabled{opacity:.5}
 .err{color:var(--bad);font-size:13px;margin:4px 0 0}
+
+/* 管理メニュー */
+.linkbtn{display:block;margin:28px auto 8px;background:none;border:1px solid var(--line);border-radius:999px;padding:8px 18px;font-size:13px;color:var(--muted)}
+.adm-card{max-width:420px}
+.adm-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.adm-head strong{font-size:20px}
+.close{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:13px;color:var(--muted)}
+.adm-card h2{margin:22px 0 6px}
+.adm-list{display:flex;flex-direction:column;gap:8px}
+.adm-btn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-weight:700}
+.adm-btn small{font-size:12px;font-weight:400;color:var(--muted)}
+.adm-btn:disabled{opacity:.5}
+.danger-outline{height:48px;border-radius:12px;background:transparent;border:1px solid var(--bad);color:var(--bad);font-weight:700;font-size:15px}
+.danger{height:48px;border-radius:12px;border:0;background:var(--bad);color:#fff;font-weight:800;font-size:15px;flex:1}
+.confirm{background:var(--bad-soft);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.confirm p{margin:0;font-size:14px;line-height:1.6}
+.confirm-row{display:flex;gap:8px}
+.confirm-row .undo{flex:1;height:48px}
+.ok-msg{color:var(--ok);font-size:13px;margin:4px 0 0}
 
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -180,12 +219,16 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
   <main class="views">
     <section id="v-reception" class="view" aria-label="受付">
       <div class="scroll">
-        <p class="hint">住んでいる自治会の <span class="k">子ども</span> か <span class="a">大人</span> を、1人につき1回タップ</p>
+        <div class="hintbar">
+          <p class="hint">住んでいる自治会の <span class="k">子ども</span> か <span class="a">大人</span> を、1人につき1回タップ</p>
+          <span id="syncState" class="sync"></span>
+        </div>
+        <div id="minusBar" class="minusbar" hidden>マイナスモード中：タップすると1人ずつ減ります。終わったら下の「終了」を押してください。</div>
         <div id="rows" class="rows"></div>
       </div>
       <div class="dock">
+        <button id="minusBtn" class="mbtn" type="button" aria-pressed="false">−1 修正</button>
         <button id="undoBtn" class="undo" type="button" disabled><span>直前を取り消す</span><small id="undoWhat"></small></button>
-        <span id="syncState" class="sync"></span>
       </div>
     </section>
 
@@ -201,6 +244,7 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
         <h2>最近の受付</h2>
         <ol id="feed" class="feed"></ol>
         <p class="note">詳しい集計（時間帯別など）は、スプレッドシートの「集計」シートで確認できます。</p>
+        <button id="adminOpen" class="linkbtn" type="button">管理メニュー（CSV保存・データクリア）</button>
       </div>
     </section>
 
@@ -241,6 +285,42 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
   </form>
 </div>
 
+<div id="admin" class="setup" hidden>
+  <div class="setup-card adm-card">
+    <div class="adm-head"><strong>管理メニュー</strong><button id="admClose" class="close" type="button">閉じる</button></div>
+
+    <form id="admLock" autocomplete="off" style="display:flex;flex-direction:column;gap:8px">
+      <label for="admPass">管理パスワード</label>
+      <input id="admPass" type="password" autocomplete="off">
+      <p class="help">スタッフ用の合言葉とは別のパスワードです。</p>
+      <p id="admLockErr" class="err" hidden></p>
+      <button id="admLockBtn" type="submit" class="primary">ひらく</button>
+    </form>
+
+    <div id="admBody" hidden>
+      <h2>CSVで保存</h2>
+      <div class="adm-list">
+        <button class="adm-btn" type="button" data-kind="summary">自治会別の集計<small>自治会ごとの子ども・大人・合計</small></button>
+        <button class="adm-btn" type="button" data-kind="log">受付ログ（全件）<small>1件ごとの日時・自治会・区分・人数・受付スタッフ</small></button>
+        <button class="adm-btn" type="button" data-kind="messages">メッセージ<small>連絡タブのやり取り</small></button>
+      </div>
+      <p id="admCsvMsg" class="ok-msg" hidden></p>
+
+      <h2>データをクリア</h2>
+      <p class="help" style="margin:0 0 10px">受付とメッセージをすべて削除します。スプレッドシートからも消え、元に戻せません。先に CSV で保存しておくと安心です。</p>
+      <button id="clearBtn" class="danger-outline" type="button" style="width:100%">データをクリア…</button>
+      <div id="clearConfirm" class="confirm" hidden>
+        <p><b>本当にすべて削除しますか？</b><br>全スタッフの画面が0人に戻り、メッセージも消えます。</p>
+        <div class="confirm-row">
+          <button id="clearNo" class="undo" type="button">やめる</button>
+          <button id="clearYes" class="danger" type="button">削除する</button>
+        </div>
+      </div>
+      <p id="admErr" class="err" hidden></p>
+    </div>
+  </div>
+</div>
+
 <script>
 (function () {
 'use strict';
@@ -274,6 +354,9 @@ const S = {
   tab: store.get('tab', 'reception'),
   lastOk: 0, netDown: false, authBad: false, booted: false,
   pollGen: 0, pollTimer: null, flushTimer: null, retryDelay: 1000,
+  epoch: store.get('epoch', null), // データクリアの番号
+  minus: false, minusTimer: null,  // マイナスモード
+  adminPass: null,                 // 管理パスワード（この画面を開いている間だけ保持）
 };
 if (!S.dev) { S.dev = uid(); store.set('dev', S.dev); }
 function save() { store.set('pend', S.pend); store.set('queue', S.queue); store.set('undo', S.undo); }
@@ -354,28 +437,76 @@ function effective() {
   S.pend.forEach(e => add(e.g, e.t, e.n));
   S.queue.forEach(op => {
     if (op.kind === 'rec') op.items.forEach(e => add(e.g, e.t, e.n));
-    else if (op.kind === 'undo') add(op.g, op.t, -1);
+    else if (op.kind === 'undo') add(op.g, op.t, -(op.s || 1));
   });
   Object.values(c).forEach(v => { v.k = Math.max(0, v.k); v.a = Math.max(0, v.a); });
   return c;
 }
 function totals(c) { let k = 0, a = 0; Object.values(c).forEach(v => { k += v.k; a += v.a; }); return { k, a, all: k + a }; }
-function applyState(st) { if (st && st.counts && st.ver >= S.server.ver) S.server = st; }
+function applyState(st) {
+  if (!st || !st.counts) return;
+  checkEpoch(st.epoch);
+  if (st.ver >= S.server.ver) S.server = st;
+}
+
+// 管理者がデータをクリアしたら、この端末の履歴も消す
+function checkEpoch(epoch) {
+  if (epoch == null) return;
+  epoch = String(epoch);
+  if (S.epoch === epoch) return;
+  const first = S.epoch == null;
+  S.epoch = epoch; store.set('epoch', epoch);
+  if (first) return;
+  S.undo = []; save();
+  S.msgs = []; S.seqSet = new Set(); S.lastSeq = 0;
+  S.seenSeq = 0; store.set('seenSeq', 0);
+  S.server = { ver: 0, counts: {}, recent: [] };
+  renderChat(true); renderBadge();
+  toast('管理者がデータをクリアしました');
+  setTimeout(kickPoll, 0);
+}
 
 // ---------- 受付タップ ----------
 function tap(g, t, btn) {
+  const s = S.minus ? -1 : 1;
+  if (s < 0) {
+    if (effective()[g][t] <= 0) { toast('0人なので減らせません'); return; }
+    armMinusTimer();
+  }
   const now = Date.now();
-  let e = S.pend.find(x => x.g === g && x.t === t && now - x.ts < 2500);
-  if (e) e.n++;
-  else { e = { id: uid(), g, t, n: 1, ts: now }; S.pend.push(e); }
-  S.undo.push({ id: e.id, g, t });
+  let e = S.pend.find(x => x.g === g && x.t === t && Math.sign(x.n) === s && now - x.ts < 2500);
+  if (e) e.n += s;
+  else { e = { id: uid(), g, t, n: s, ts: now }; S.pend.push(e); }
+  S.undo.push({ id: e.id, g, t, s });
   if (S.undo.length > 40) S.undo.shift();
   save();
   scheduleFlush();
   renderCounts(true);
-  const fly = h('span', { class: 'fly' }, '+1');
+  const fly = h('span', { class: 'fly' }, s > 0 ? '+1' : '−1');
   btn.append(fly); setTimeout(() => fly.remove(), 650);
-  try { navigator.vibrate && navigator.vibrate(12); } catch (err) {}
+  try { navigator.vibrate && navigator.vibrate(s > 0 ? 12 : [12, 60, 12]); } catch (err) {}
+}
+
+// ---------- マイナスモード（まちがえて押した人数を減らす） ----------
+function setMinus(on) {
+  S.minus = on;
+  clearTimeout(S.minusTimer);
+  $('#v-reception').classList.toggle('minus-on', on);
+  $('#minusBar').hidden = !on;
+  const b = $('#minusBtn');
+  b.setAttribute('aria-pressed', String(on));
+  b.textContent = on ? '終了' : '−1 修正';
+  Object.values(S.rowEls).forEach(r => {
+    r.lk.textContent = on ? '子ども −1' : '子ども';
+    r.la.textContent = on ? '大人 −1' : '大人';
+  });
+  if (on) armMinusTimer();
+  renderCounts();
+}
+// 押し忘れ防止：20秒なにもしなければ通常モードに戻す
+function armMinusTimer() {
+  clearTimeout(S.minusTimer);
+  S.minusTimer = setTimeout(() => { if (S.minus) { setMinus(false); toast('マイナスモードを終了しました'); } }, 20000);
 }
 
 // 連続タップは少しまとめてから送る（最大2秒待ち）
@@ -421,26 +552,33 @@ async function pump() {
 }
 
 function doUndo() {
-  const u = S.undo.pop();
+  const u = S.undo[S.undo.length - 1];
   if (!u) return;
+  const s = u.s || 1;
+  if (s > 0 && effective()[u.g] && effective()[u.g][u.t] <= 0) {
+    S.undo.pop(); save(); renderDock();
+    toast('すでに0人のため取り消せません'); return;
+  }
+  S.undo.pop();
   let done = false;
   const p = S.pend.find(e => e.id === u.id);
   if (p) {
-    p.n--; if (p.n <= 0) S.pend = S.pend.filter(e => e !== p);
+    p.n -= s; if (p.n === 0) S.pend = S.pend.filter(e => e !== p);
     done = true;
   }
   if (!done) {
     for (const op of S.queue) {
       if (op === S.inflight || op.kind !== 'rec') continue;
       const it = op.items.find(e => e.id === u.id);
-      if (it) { it.n--; if (it.n <= 0) op.items = op.items.filter(e => e !== it); done = true; break; }
+      if (it) { it.n -= s; if (it.n === 0) op.items = op.items.filter(e => e !== it); done = true; break; }
     }
     S.queue = S.queue.filter(op => op === S.inflight || op.kind !== 'rec' || op.items.length);
   }
-  if (!done) S.queue.push({ kind: 'undo', id: u.id, g: u.g, t: u.t });
+  if (!done) S.queue.push({ kind: 'undo', id: u.id, g: u.g, t: u.t, s });
   save(); renderCounts();
   const g = S.gmap[u.g];
-  toast((g ? g.short : '') + '　' + TYPE_LABEL[u.t] + 'を1名取り消しました');
+  const name = (g ? g.short : '') + '　' + TYPE_LABEL[u.t];
+  toast(s > 0 ? name + 'を1名取り消しました' : name + 'の −1 を取り消しました（+1）');
   pump();
 }
 
@@ -449,10 +587,12 @@ function kickPoll() { clearTimeout(S.pollTimer); const gen = ++S.pollGen; poll(g
 async function poll(gen) {
   if (!S.me || S.authBad) return;
   try {
-    const r = await call('sync', auth(), S.lastSeq);
+    const sentSeq = S.lastSeq, sentEpoch = S.epoch;
+    const r = await call('sync', auth(), sentSeq);
     setNet(true);
+    checkEpoch(r.epoch != null ? r.epoch : r.state && r.state.epoch);
     if (!S.inflight && !S.queue.length) applyState(r.state);
-    addMsgs(r.msgs);
+    if (S.epoch === sentEpoch || sentSeq === 0) addMsgs(r.msgs);
     if (!S.booted) {
       S.booted = true;
       if (S.seenSeq > S.lastSeq) { S.seenSeq = S.lastSeq; store.set('seenSeq', S.seenSeq); }
@@ -475,14 +615,15 @@ function buildGroups() {
   rows.textContent = ''; bars.textContent = '';
   S.groups.forEach(g => {
     const ck = h('span', { class: 'k' }), ca = h('span', { class: 'a' });
-    const bk = h('button', { class: 'tap k', type: 'button', 'aria-label': g.name + '　子ども1名' }, '子ども');
-    const ba = h('button', { class: 'tap a', type: 'button', 'aria-label': g.name + '　大人1名' }, '大人');
+    const lk = h('span', null, '子ども'), la = h('span', null, '大人');
+    const bk = h('button', { class: 'tap k', type: 'button', 'aria-label': g.name + '　子ども' }, lk);
+    const ba = h('button', { class: 'tap a', type: 'button', 'aria-label': g.name + '　大人' }, la);
     bk.addEventListener('click', () => tap(g.key, 'k', bk));
     ba.addEventListener('click', () => tap(g.key, 'a', ba));
     rows.append(h('div', { class: 'row' + (g.key === 'other' ? ' other' : '') },
       h('div', null, h('div', { class: 'short', text: g.short }), h('div', { class: 'gc' }, ck, '　', ca)),
       bk, ba));
-    S.rowEls[g.key] = { ck, ca };
+    S.rowEls[g.key] = { ck, ca, bk, ba, lk, la };
 
     const iK = h('i', { class: 'k' }), iA = h('i', { class: 'a' });
     const num = h('span', { class: 'num' }, '0'), sub = h('small');
@@ -514,6 +655,8 @@ function renderCounts(fromTap) {
     const v = c[g.key], r = S.rowEls[g.key], b = S.barEls[g.key];
     r.ck.textContent = '子ども ' + v.k;
     r.ca.textContent = '大人 ' + v.a;
+    r.bk.disabled = S.minus && v.k <= 0;
+    r.ba.disabled = S.minus && v.a <= 0;
     b.num.textContent = v.k + v.a;
     b.sub.textContent = '子ども' + v.k + '・大人' + v.a;
     b.iK.style.width = (v.k / max * 100) + '%';
@@ -525,23 +668,25 @@ function renderCounts(fromTap) {
 function renderFeed() {
   const feed = $('#feed');
   feed.textContent = '';
-  const list = (S.server.recent || []).filter(e => e.n > 0).slice(-10).reverse();
+  const list = (S.server.recent || []).filter(e => e.n !== 0).slice(-10).reverse();
   if (!list.length) { feed.append(h('li', { class: 'none' }, 'まだ受付はありません')); return; }
   list.forEach(e => {
     const g = S.gmap[e.g];
     feed.append(h('li', null,
       h('time', { text: hhmm(e.ts) }),
       h('div', { class: 'g' }, g ? g.short : e.g, h('span', { class: 'who', text: e.staff || '' })),
-      h('span', { class: 'pill ' + e.t, text: TYPE_LABEL[e.t] + ' ' + e.n + '名' })));
+      h('span', { class: 'pill ' + e.t, text: TYPE_LABEL[e.t] + ' ' + (e.n > 0 ? e.n + '名' : '−' + (-e.n) + '名（修正）') })));
   });
 }
 
 function renderDock() {
   const u = S.undo[S.undo.length - 1];
   $('#undoBtn').disabled = !u;
-  $('#undoWhat').textContent = u ? ((S.gmap[u.g] ? S.gmap[u.g].short : '') + ' ' + TYPE_LABEL[u.t]) : '';
-  const n = S.pend.reduce((s, e) => s + e.n, 0)
-    + S.queue.reduce((s, op) => s + (op.kind === 'rec' ? op.items.reduce((x, e) => x + e.n, 0) : 1), 0);
+  $('#undoWhat').textContent = u
+    ? ((S.gmap[u.g] ? S.gmap[u.g].short : '') + ' ' + TYPE_LABEL[u.t] + ((u.s || 1) < 0 ? ' −1' : ''))
+    : '';
+  const n = S.pend.reduce((s, e) => s + Math.abs(e.n), 0)
+    + S.queue.reduce((s, op) => s + (op.kind === 'rec' ? op.items.reduce((x, e) => x + Math.abs(e.n), 0) : 1), 0);
   const el = $('#syncState');
   if (n > 0) { el.textContent = S.netDown ? '未送信 ' + n + '件\n再接続中…' : '送信中 ' + n + '件'; el.className = 'sync warn'; }
   else { el.textContent = S.lastOk ? '全員に反映済み' : '接続中…'; el.className = 'sync'; }
@@ -636,9 +781,106 @@ function toast(text) {
   toastTimer = setTimeout(() => { t.hidden = true; }, 2200);
 }
 
+// ---------- 管理メニュー ----------
+function openAdmin() {
+  $('#admin').hidden = false;
+  $('#admLockErr').hidden = true;
+  $('#admErr').hidden = true;
+  $('#admCsvMsg').hidden = true;
+  $('#clearConfirm').hidden = true;
+  $('#clearBtn').hidden = false;
+  const unlocked = !!S.adminPass;
+  $('#admLock').hidden = unlocked;
+  $('#admBody').hidden = !unlocked;
+  if (!unlocked) { $('#admPass').value = ''; setTimeout(() => $('#admPass').focus(), 50); }
+}
+function closeAdmin() { $('#admin').hidden = true; }
+
+function admError(e, el) {
+  if (isAuth(e)) { closeAdmin(); showSetup(errText(e)); return; }
+  el.textContent = isApp(e) ? errText(e) : '接続できませんでした。電波の良い場所でもう一度お試しください。';
+  el.hidden = false;
+}
+
+async function onAdminUnlock(ev) {
+  ev.preventDefault();
+  const pass = $('#admPass').value.trim();
+  const err = $('#admLockErr');
+  if (!pass) { err.textContent = '管理パスワードを入力してください'; err.hidden = false; return; }
+  const btn = $('#admLockBtn');
+  btn.disabled = true; btn.textContent = '確認中…'; err.hidden = true;
+  try {
+    await call('adminVerify', auth(), pass);
+    S.adminPass = pass;
+    openAdmin();
+  } catch (e) {
+    admError(e, err);
+  } finally {
+    btn.disabled = false; btn.textContent = 'ひらく';
+  }
+}
+
+// Excel で文字化けしないよう BOM 付き UTF-8。数式として実行されないよう先頭の = + - @ を無害化
+function toCsv(rows) {
+  const cell = v => {
+    if (v == null) return '';
+    let s = String(v);
+    if (typeof v === 'string' && /^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  return '﻿' + rows.map(r => r.map(cell).join(',')).join('\r\n') + '\r\n';
+}
+function saveFile(filename, text) {
+  const url = URL.createObjectURL(new Blob([text], { type: 'text/csv;charset=utf-8' }));
+  const a = h('a', { href: url, download: filename });
+  document.body.append(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 3000);
+}
+
+async function onExport(btn) {
+  const msg = $('#admCsvMsg'), err = $('#admErr');
+  msg.hidden = true; err.hidden = true;
+  document.querySelectorAll('.adm-btn').forEach(b => { b.disabled = true; });
+  try {
+    const r = await call('adminExport', auth(), S.adminPass, btn.dataset.kind);
+    saveFile(r.filename, toCsv(r.rows));
+    msg.textContent = r.filename + ' を保存しました（' + Math.max(0, r.rows.length - 1) + '行）';
+    msg.hidden = false;
+  } catch (e) {
+    if (isApp(e) && /管理パスワード/.test(msgOf(e))) S.adminPass = null;
+    admError(e, err);
+  } finally {
+    document.querySelectorAll('.adm-btn').forEach(b => { b.disabled = false; });
+  }
+}
+
+async function onClear() {
+  const yes = $('#clearYes'), err = $('#admErr');
+  yes.disabled = true; yes.textContent = '削除中…'; err.hidden = true;
+  try {
+    // この端末の送信待ちのタップも一緒に破棄する
+    clearTimeout(S.flushTimer);
+    S.pend = []; S.queue = S.queue.filter(op => op === S.inflight); save();
+    const st = await call('adminClear', auth(), S.adminPass);
+    applyState(st);
+    renderCounts();
+    $('#clearConfirm').hidden = true;
+    $('#clearBtn').hidden = false;
+    const msg = $('#admCsvMsg');
+    msg.textContent = 'データをクリアしました';
+    msg.hidden = false;
+  } catch (e) {
+    admError(e, err);
+  } finally {
+    yes.disabled = false; yes.textContent = '削除する';
+  }
+}
+
 // ---------- タブ ----------
 function setTab(tab) {
   if (!['reception', 'status', 'chat'].includes(tab)) tab = 'reception';
+  if (tab !== 'reception' && S.minus) setMinus(false);
   S.tab = tab; store.set('tab', tab);
   ['reception', 'status', 'chat'].forEach(t => { $('#v-' + t).hidden = t !== tab; });
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
@@ -704,6 +946,14 @@ async function boot() {
   }
   document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
   $('#undoBtn').addEventListener('click', doUndo);
+  $('#minusBtn').addEventListener('click', () => setMinus(!S.minus));
+  $('#adminOpen').addEventListener('click', openAdmin);
+  $('#admClose').addEventListener('click', closeAdmin);
+  $('#admLock').addEventListener('submit', onAdminUnlock);
+  document.querySelectorAll('.adm-btn').forEach(b => b.addEventListener('click', () => onExport(b)));
+  $('#clearBtn').addEventListener('click', () => { $('#clearBtn').hidden = true; $('#clearConfirm').hidden = false; $('#admCsvMsg').hidden = true; });
+  $('#clearNo').addEventListener('click', () => { $('#clearConfirm').hidden = true; $('#clearBtn').hidden = false; });
+  $('#clearYes').addEventListener('click', onClear);
   $('#meBtn').addEventListener('click', () => showSetup());
   $('#banner').addEventListener('click', () => setTab('chat'));
   $('#setupForm').addEventListener('submit', onSetup);
@@ -773,12 +1023,15 @@ const Mock = (function () {
     const counts = {};
     GROUPS.forEach(g => { counts[g.key] = { k: 0, a: 0 }; });
     db.rows.forEach(r => { if (counts[r.g]) counts[r.g][r.t] += r.n; });
-    return { ver: db.ver, counts, recent: db.rows.slice(-15) };
+    return { ver: db.ver, epoch: db.epoch || '0', counts, recent: db.rows.slice(-15) };
   }
+  // デモモードの管理パスワードは admin
+  const admin = p => { if (p !== 'admin') throw new Error('[APP] 管理パスワードが違います（デモは admin）'); };
+  const fmt = ts => { const d = new Date(ts); return d.toLocaleDateString('ja-JP') + ' ' + d.toLocaleTimeString('ja-JP'); };
   const bump = () => { db.ver = Math.max(Date.now(), db.ver + 1); };
   return {
     async getConfig() { await wait(); return { eventName: '高洲地区ハロウィン', needPass: false, groups: GROUPS }; },
-    async sync(a, last) { await wait(); db = store.get('demo_db', db); return { state: state(), msgs: db.msgs.filter(m => m.seq > last) }; },
+    async sync(a, last) { await wait(); db = store.get('demo_db', db); return { state: state(), epoch: db.epoch || '0', msgs: db.msgs.filter(m => m.seq > last) }; },
     async record(a, items) {
       await wait();
       items.forEach(it => { if (db.seen[it.id]) return; db.seen[it.id] = 1; db.rows.push({ id: it.id, ts: Date.now(), g: it.g, t: it.t, n: it.n, staff: a.name }); });
@@ -788,13 +1041,33 @@ const Mock = (function () {
       await wait();
       const r = db.rows.find(x => x.id === id);
       if (!r) throw new Error('[APP] 取り消す受付が見つかりません');
-      if (r.n > 0) r.n--;
+      if (r.n > 0) r.n--; else if (r.n < 0) r.n++;
       bump(); persist(); return state();
     },
     async postMessage(a, text, cid) {
       await wait();
       const m = { seq: db.msgs.length + 1, ts: Date.now(), name: a.name, text, dev: a.dev, cid };
       db.msgs.push(m); persist(); return { msg: m };
+    },
+    async adminVerify(a, p) { await wait(); admin(p); return true; },
+    async adminExport(a, p, kind) {
+      await wait(); admin(p);
+      const gname = k => (GROUPS.find(g => g.key === k) || {}).name || k;
+      if (kind === 'summary') {
+        const s = state(); const rows = [['自治会', '子ども', '大人', '合計']];
+        GROUPS.forEach(g => { const c = s.counts[g.key]; rows.push([g.name, c.k, c.a, c.k + c.a]); });
+        return { filename: 'デモ_自治会別集計.csv', rows };
+      }
+      if (kind === 'log') {
+        return { filename: 'デモ_受付ログ.csv', rows: [['ID', '日時', '自治会', '区分', '人数', '受付スタッフ']]
+          .concat(db.rows.map(r => [r.id, fmt(r.ts), gname(r.g), TYPE_LABEL[r.t], r.n, r.staff])) };
+      }
+      return { filename: 'デモ_メッセージ.csv', rows: [['No', '日時', '名前', 'メッセージ']]
+        .concat(db.msgs.map(m => [m.seq, fmt(m.ts), m.name, m.text])) };
+    },
+    async adminClear(a, p) {
+      await wait(); admin(p);
+      db.rows = []; db.msgs = []; db.epoch = String(Date.now()); bump(); persist(); return state();
     },
   };
 })();
