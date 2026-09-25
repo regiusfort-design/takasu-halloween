@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>運営アプリ 取扱説明書</title>
+<meta name="description" content="高洲地区ハロウィンイベント 運営アプリの使い方（運営スタッフ向け）">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#15111C">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap&text=0123456789%E9%81%8B%E5%96%B6%E3%82%A2%E3%83%97%E3%83%AA%E5%8F%96%E6%89%B1%E8%AA%AC%E6%98%8E%E6%9B%B8">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F5F3F9; --paper:#FFFFFF; --line:#E2DDEB; --ink:#1D1726; --muted:#655B74; --faint:#8C8399;
+  --pumpkin:#D9650B; --pumpkin-bg:#FF8A1F; --pumpkin-ink:#1C0E02; --pumpkin-soft:#FFF0E3;
+  --moon:#5E48BF; --moon-bg:#C8B6FF; --moon-ink:#160F2A;
+  --ok:#17875A; --ok-bg:#5ED39B; --ok-soft:#E3F6EC; --bad:#C92F42; --bad-bg:#FF5E6E; --bad-soft:#FDE8EB;
+  --night:#15111C;
+  --display:"Dela Gothic One","Hiragino Sans","Noto Sans JP",sans-serif;
+  --ui:system-ui,-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#15111C; --paper:#201929; --line:#3A2F48; --ink:#F4EDE3; --muted:#A89CB6; --faint:#766A88;
+    --pumpkin:#FF9A3D; --pumpkin-soft:#3A2616; --moon:#C8B6FF; --ok:#5ED39B; --ok-soft:#173026; --bad:#FF7482; --bad-soft:#3A1C24;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#15111C; --paper:#201929; --line:#3A2F48; --ink:#F4EDE3; --muted:#A89CB6; --faint:#766A88;
+  --pumpkin:#FF9A3D; --pumpkin-soft:#3A2616; --moon:#C8B6FF; --ok:#5ED39B; --ok-soft:#173026; --bad:#FF7482; --bad-soft:#3A1C24;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.8 var(--ui);padding-inline:16px}
+a{color:var(--pumpkin)}
+img{max-width:100%}
+.wrap{max-width:780px;margin:0 auto;padding-block:0 64px}
+
+/* 表紙 */
+.cover{background:var(--night);color:#F4EDE3;margin-inline:-16px;padding:40px 16px 32px}
+.cover-in{max-width:780px;margin:0 auto;display:flex;gap:20px;align-items:center}
+.cover img{width:84px;height:84px;border-radius:20px;flex:none}
+.cover .ev{font-size:13px;letter-spacing:.1em;color:#C8B6FF;margin:0}
+.cover h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,7vw,44px);line-height:1.15;margin:4px 0 8px;color:#FF8A1F;text-wrap:balance}
+.cover p{margin:0;color:#CFC5DA;font-size:14px}
+.cover .open{display:inline-block;margin-top:14px;background:#FF8A1F;color:#1C0E02;text-decoration:none;font-weight:800;border-radius:999px;padding:8px 18px;font-size:14px}
+
+/* 本文 */
+h2{font-size:24px;line-height:1.4;margin:56px 0 6px;text-wrap:balance;display:flex;align-items:baseline;gap:12px}
+h2 .no{font-family:var(--display);font-weight:400;color:var(--pumpkin);font-size:28px;flex:none}
+h3{font-size:18px;margin:28px 0 4px}
+p{margin:10px 0}
+.lead{color:var(--muted);margin-top:0}
+.for{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.04em;border-radius:999px;padding:1px 10px;margin:0 0 8px;background:var(--paper);border:1px solid var(--line);color:var(--muted)}
+ul,ol{padding-left:1.4em;margin:10px 0}
+li{margin:4px 0}
+.note{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:16px 0;font-size:15px}
+.note.warn{background:var(--bad-soft);border-color:transparent}
+.note.tip{background:var(--ok-soft);border-color:transparent}
+.note b:first-child{display:block}
+
+/* 画面の見本（アプリと同じ色のボタン） */
+.ui{display:inline-block;font-weight:800;font-size:.86em;line-height:1.5;border-radius:8px;padding:0 .6em;margin:0 .1em;white-space:nowrap;vertical-align:.05em}
+.ui.k{background:var(--pumpkin-bg);color:var(--pumpkin-ink)}
+.ui.a{background:var(--moon-bg);color:var(--moon-ink)}
+.ui.ready{background:var(--ok-bg);color:#06210F}
+.ui.end{border:1.5px solid var(--bad-bg);color:var(--bad)}
+.ui.red{background:var(--bad-bg);color:#fff}
+.ui.line{border:1.5px solid var(--line);color:var(--ink);background:var(--paper)}
+.ui.minus{border:1.5px solid var(--pumpkin-bg);color:var(--pumpkin)}
+.tag{display:inline-block;font-size:.78em;font-weight:700;border-radius:4px;padding:0 .5em;white-space:nowrap}
+.tag.before{background:var(--line);color:var(--muted)}
+.tag.open{background:var(--ok-soft);color:var(--ok)}
+.tag.closed{background:var(--bad-soft);color:var(--bad)}
+
+/* 画面写真と説明の並び */
+.shot{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:8px 28px;align-items:start;margin:20px 0}
+.shot figure{margin:0}
+.shot img{display:block;width:100%;height:auto}
+.shot figcaption{font-size:12px;color:var(--faint);text-align:center;margin-top:2px}
+.shot .txt > :first-child{margin-top:0}
+@media (max-width:620px){
+  .shot{grid-template-columns:1fr}
+  .shot figure{max-width:280px;margin:0 auto}
+}
+
+/* 表 */
+.tbl{overflow-x:auto;margin:14px 0}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--paper);border-radius:12px;overflow:hidden}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:700;background:transparent;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+
+/* 役割の案内 */
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:18px 0}
+.roles a{display:block;text-decoration:none;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.roles a b{display:block;font-size:15px}
+.roles a span{display:block;font-size:13px;color:var(--muted);line-height:1.5}
+.roles a:hover,.roles a:focus-visible{border-color:var(--pumpkin)}
+
+/* 当日の流れ */
+.flow{list-style:none;padding:0;margin:18px 0;counter-reset:f}
+.flow li{counter-increment:f;position:relative;padding:0 0 18px 48px;margin:0}
+.flow li::before{content:counter(f);position:absolute;left:0;top:2px;width:32px;height:32px;border-radius:50%;background:var(--pumpkin-bg);color:var(--pumpkin-ink);font-family:var(--display);font-size:16px;display:flex;align-items:center;justify-content:center}
+.flow li::after{content:"";position:absolute;left:15px;top:38px;bottom:4px;width:2px;background:var(--line)}
+.flow li:last-child::after{display:none}
+.flow b{display:block}
+.flow .who{font-size:12px;color:var(--muted)}
+
+/* こまったとき */
+dl.faq{margin:14px 0}
+.faq dt{font-weight:800;margin-top:18px}
+.faq dd{margin:4px 0 0;color:var(--ink)}
+
+.url{font-family:ui-monospace,Consolas,monospace;font-size:14px;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:block;overflow-wrap:anywhere}
+footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+:focus-visible{outline:2px solid var(--pumpkin);outline-offset:2px}
+
+@media print{
+  :root{color-scheme:light}
+  body{background:#fff;font-size:11pt;padding:0}
+  .cover{background:#fff;color:#000;border-bottom:2px solid #000;padding:0 0 12px;margin:0}
+  .cover h1{color:#000}.cover p,.cover .ev{color:#333}.cover .open{display:none}
+  h2{break-after:avoid;margin-top:28px}
+  .shot,.note,table,.flow li{break-inside:avoid}
+  .shot{grid-template-columns:200px 1fr}
+  .roles{display:none}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <div class="cover-in">
+    <img src="icon-192.png" alt="">
+    <div>
+      <p class="ev">高洲地区ハロウィンイベント</p>
+      <h1>運営アプリ 取扱説明書</h1>
+      <p>運営スタッフ向け｜本部受付・各自治会の担当・主催者</p>
+      <a class="open" href="./?openExternalBrowser=1">アプリを開く</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <p style="margin-top:28px">このアプリは、当日の受付人数と受付の状況を、運営スタッフ全員のスマホでリアルタイムに共有するためのものです。インストールは不要で、配られた URL をスマホで開くだけで使えます。</p>
+
+  <div class="tbl"><table>
+    <tr><th>画面（下のタブ）</th><th>できること</th></tr>
+    <tr><td><b>状況</b></td><td>本部の受付状況、受付した人数（合計・自治会別）、各自治会の準備・受付の状況を見る</td></tr>
+    <tr><td><b>本部受付</b></td><td>本部（高洲中央公園）で、来た人を自治会別に数える</td></tr>
+    <tr><td><b>自治会状況</b></td><td>各自治会の「準備完了」「受付終了」を知らせる</td></tr>
+    <tr><td><b>連絡</b></td><td>スタッフ全員でメッセージをやり取りする（LINE のグループのような使い方）</td></tr>
+  </table></div>
+
+  <h3>自分の役割のところから読んでください</h3>
+  <nav class="roles" aria-label="役割ごとの説明">
+    <a href="#start"><b>全員</b><span>1 はじめて開くとき<br>2 画面の見かた<br>5 連絡</span></a>
+    <a href="#hq"><b>本部受付の担当</b><span>3 本部受付（人数を数える）</span></a>
+    <a href="#groups"><b>各自治会の担当</b><span>4 自治会状況（準備完了・受付終了）</span></a>
+    <a href="#admin"><b>主催者（本部）</b><span>6 管理メニュー<br>7 当日の流れ</span></a>
+  </nav>
+
+  <!-- 1 -->
+  <section id="start">
+    <h2><span class="no">1</span>はじめて開くとき</h2>
+    <p class="for">全員</p>
+    <div class="shot">
+      <figure><img src="manual-setup.png" alt="名前と合言葉を入れる最初の画面" width="434" height="784" loading="lazy"><figcaption>最初の画面</figcaption></figure>
+      <div class="txt">
+        <ol>
+          <li>LINE で配られた URL をタップします。
+            <span class="url">https://regiusfort-design.github.io/takasu-halloween/?openExternalBrowser=1</span></li>
+          <li><b>あなたの名前・係</b> を入れます（例：「本部 受付A」「潮音の街 担当」）。メッセージの送信者名と受付の記録に使います。</li>
+          <li><b>合言葉</b> を入れます。合言葉は本部から別に連絡します。</li>
+          <li><span class="ui k">はじめる</span> を押します。</li>
+        </ol>
+        <p>2回目からは、名前と合言葉を入れなくても開けます。</p>
+      </div>
+    </div>
+
+    <h3>ホーム画面に追加しておくと便利です</h3>
+    <ul>
+      <li><b>iPhone（Safari）</b>：画面下の共有ボタン（□に↑）→「ホーム画面に追加」</li>
+      <li><b>Android（Chrome）</b>：右上の「︙」→「ホーム画面に追加」または「アプリをインストール」</li>
+    </ul>
+    <p>かぼちゃのアイコン「高洲ハロウィン」が追加されます。iPhone ではホーム画面から開いたときに、もう一度だけ名前と合言葉を入れてください。</p>
+    <div class="note tip"><b>名前を変えたいとき</b>画面右上の名前のボタンを押すと、名前を入れ直せます。</div>
+  </section>
+
+  <!-- 2 -->
+  <section id="screen">
+    <h2><span class="no">2</span>画面の見かた</h2>
+    <p class="for">全員</p>
+    <div class="shot">
+      <figure><img src="manual-status.png" alt="状況タブの画面" width="434" height="784" loading="lazy"><figcaption>状況タブ</figcaption></figure>
+      <div class="txt">
+        <h3 style="margin-top:0">画面のいちばん上（どのタブでも表示）</h3>
+        <ul>
+          <li>大きな数字：本部で受付した<b>合計人数</b>。右に子ども・大人の人数。</li>
+          <li>ラベル：本部の受付状況 <span class="tag before">受付前</span> <span class="tag open">受付中</span> <span class="tag closed">受付終了</span></li>
+          <li>名前のボタンの ● ：<b style="color:var(--ok)">緑</b>はつながっている、<b style="color:var(--bad)">赤</b>は電波が弱くつながっていない状態です。</li>
+        </ul>
+        <h3>状況タブ</h3>
+        <ul>
+          <li>一番上の帯：<b>本部（高洲中央公園）</b>の受付状況。受付が終わると赤く「本部（高洲中央公園） 受付終了」と表示されます。</li>
+          <li>自治会別：人数の棒グラフ（<span style="color:var(--pumpkin);font-weight:700">■子ども</span> <span style="color:var(--moon);font-weight:700">■大人</span>）と、各自治会の状況 <span class="tag before">準備中</span> <span class="tag open">準備完了</span> <span class="tag closed">受付終了</span></li>
+          <li>最近の受付：だれが、いつ、どの自治会を受付したか。</li>
+        </ul>
+        <p>表示は約3秒ごとに自動で新しくなります。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section id="hq">
+    <h2><span class="no">3</span>本部受付（人数を数える）</h2>
+    <p class="for">本部（高洲中央公園）の受付担当</p>
+    <div class="shot">
+      <figure><img src="manual-reception.png" alt="本部受付タブの画面" width="434" height="784" loading="lazy"><figcaption>本部受付タブ</figcaption></figure>
+      <div class="txt">
+        <ol>
+          <li>下の <b>本部受付</b> タブを開きます。</li>
+          <li>来た人に住んでいるマンション（自治会）を聞きます。</li>
+          <li>その自治会の <span class="ui k">子ども</span> か <span class="ui a">大人</span> を、<b>1人につき1回</b> タップします。家族4人なら4回です。</li>
+          <li>参加自治会以外の人は <b>その他・地区外</b> の行で数えます。</li>
+        </ol>
+        <p>タップするとボタンに「+1」と出て、数秒で全スタッフの画面に反映されます。</p>
+        <div class="note">
+          <b>ボタンが押せない（薄く表示される）とき</b>
+          本部の受付が <span class="tag before">受付前</span> か <span class="tag closed">受付終了</span> です。受付の開始・終了は主催者が行います。画面上の帯で確認してください。
+        </div>
+      </div>
+    </div>
+
+    <h3>送信の状態（画面右上の小さな文字）</h3>
+    <div class="tbl"><table>
+      <tr><th>表示</th><th>意味</th></tr>
+      <tr><td>全員に反映済み</td><td>すべて送信できています</td></tr>
+      <tr><td>送信中 ○件</td><td>送っているところです（すぐに消えます）</td></tr>
+      <tr><td>未送信 ○件・再接続中</td><td>電波が弱く、まだ送れていません。つながると自動で送られます。<b>このあいだはアプリを閉じないでください。</b></td></tr>
+    </table></div>
+
+    <h3>まちがえて押したとき</h3>
+    <div class="shot">
+      <figure><img src="manual-minus.png" alt="人数を減らすモードの画面" width="434" height="784" loading="lazy"><figcaption>人数を減らすモード</figcaption></figure>
+      <div class="txt">
+        <ol>
+          <li>画面下の <span class="ui line">まちがえた人数を減らす</span> を押します。</li>
+          <li>ボタンが <span class="ui minus">子ども −1</span> <span class="ui minus">大人 −1</span> に変わり、上に赤い帯が出ます。</li>
+          <li>減らしたい自治会・区分のボタンを押すと、1人減ります。</li>
+          <li>終わったら <span class="ui red">減らすのをやめる</span> を押します。</li>
+        </ol>
+        <ul>
+          <li>20秒間なにもしないと、自動で元に戻ります。</li>
+          <li>0人のところは減らせません（ボタンが薄くなります）。</li>
+          <li>ほかのスタッフが数えた分も減らせます。減らした記録は残ります。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="groups">
+    <h2><span class="no">4</span>自治会状況（準備完了・受付終了）</h2>
+    <p class="for">各自治会の担当</p>
+    <div class="shot">
+      <figure><img src="manual-groups.png" alt="自治会状況タブの画面" width="434" height="784" loading="lazy"><figcaption>自治会状況タブ</figcaption></figure>
+      <div class="txt">
+        <ol>
+          <li>下の <b>自治会状況</b> タブを開き、自分の自治会の行を探します。</li>
+          <li>自治会の準備ができたら <span class="ui ready">準備完了</span> を押します。</li>
+          <li><b>本部の受付が終わったあと</b>、自治会での受付が終わったら <span class="ui end">受付終了</span> を押し、続けて <span class="ui red">終了する</span> を押して確定します。</li>
+        </ol>
+        <ul>
+          <li>状況は <span class="tag before">準備中</span> → <span class="tag open">準備完了</span> → <span class="tag closed">受付終了</span> と変わり、押した時刻も表示されます。</li>
+          <li>押すと「連絡」タブに <b>本部（自動）</b> からお知らせが届き、全員に伝わります。</li>
+          <li>本部がまだ受付中のときに「受付終了」を押すと注意が出ますが、そのまま終了もできます。</li>
+          <li>自治会の受付終了は、<b>本部受付の人数の数え方には影響しません</b>。</li>
+        </ul>
+        <div class="note tip"><b>まちがえて押したとき</b>「準備完了」は <u>準備中に戻す</u>、「受付終了」は <span class="ui line">受付を再開</span> で元に戻せます。「受付終了」を押して8秒なにもしなければ、確定せずに元に戻ります。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="chat">
+    <h2><span class="no">5</span>連絡（メッセージ）</h2>
+    <p class="for">全員</p>
+    <div class="shot">
+      <figure><img src="manual-chat.png" alt="連絡タブの画面" width="434" height="784" loading="lazy"><figcaption>連絡タブ</figcaption></figure>
+      <div class="txt">
+        <ul>
+          <li>ここに書いたメッセージは、<b>スタッフ全員</b>に届きます。</li>
+          <li>自分のメッセージは右側（オレンジ）、ほかの人のメッセージは左側に名前つきで表示されます。</li>
+          <li>入力欄の上のボタン（「了解です」「お菓子の補充お願いします」など）を押すと、よく使う文が入ります。そのあと <span class="ui k">送信</span> を押します。</li>
+          <li>ほかのタブを見ているときに新しいメッセージが来ると、画面の上にお知らせが出ます。「連絡」タブの赤い数字は未読の数です。</li>
+          <li>送れなかったメッセージは「送信できませんでした。タップで再送」と出ます。タップすると送り直します。</li>
+        </ul>
+        <p>1通は300文字までです。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="admin">
+    <h2><span class="no">6</span>管理メニュー</h2>
+    <p class="for">主催者（本部）</p>
+    <p class="lead">「状況」タブの一番下にある <span class="ui line">管理メニュー</span> を押し、<b>管理パスワード</b>を入れて開きます。管理パスワードは主催者だけが知っているもので、この説明書には書いていません。10分以内に10回まちがえると、しばらく使えなくなります。</p>
+
+    <div class="shot">
+      <figure><img src="manual-admin.png" alt="管理メニューの画面（本部の受付）" width="434" height="784" loading="lazy"><figcaption>管理メニュー（上）</figcaption></figure>
+      <div class="txt">
+        <h3 style="margin-top:0">本部（高洲中央公園）の受付</h3>
+        <ul>
+          <li><span class="ui k">受付を開始する</span>：全員の「本部受付」のボタンが押せるようになります。</li>
+          <li><span class="ui end">受付を終了する…</span>：確認のあと <span class="ui red">終了する</span> を押すと、本部受付のボタンが押せなくなり、状況タブに「本部（高洲中央公園） 受付終了」と表示されます。</li>
+          <li><span class="ui k">受付を再開する</span>：終了を取り消して、受付中に戻します。</li>
+        </ul>
+        <p>開始・終了・再開をすると、「連絡」タブに全員へお知らせが届きます。終了を押した直後（2分以内）に届いた受付は、通信の遅れとして記録されます。</p>
+        <p>受付前・受付終了のときは、「本部受付」タブの上に出る「本部用：開始する／再開する」からも管理メニューを開けます。</p>
+      </div>
+    </div>
+
+    <div class="shot">
+      <figure><img src="manual-clear.png" alt="管理メニューの画面（CSV保存とデータクリア）" width="434" height="784" loading="lazy"><figcaption>管理メニュー（下）</figcaption></figure>
+      <div class="txt">
+        <h3 style="margin-top:0">CSV で保存</h3>
+        <p>「自治会別の集計」「受付ログ（全件）」「メッセージ」を、それぞれ Excel で開けるファイルに保存します。自治会別の集計には、本部の受付開始・終了時刻と、各自治会の準備完了・受付終了時刻も入ります。</p>
+        <h3>データをクリア</h3>
+        <p>どれも確認のあとに実行します。スプレッドシートからも消え、<b>元に戻せません</b>。先に CSV で保存してください。</p>
+      </div>
+    </div>
+    <div class="tbl"><table>
+      <tr><th>ボタン</th><th>消えるもの</th></tr>
+      <tr><td>受付の人数をクリア</td><td>受付ログ（自治会別の集計も0人に戻ります）</td></tr>
+      <tr><td>メッセージをクリア</td><td>連絡タブのやり取り</td></tr>
+      <tr><td>受付状況をリセット</td><td>本部を「受付前」、各自治会を「準備中」に戻します（人数とメッセージは残ります）</td></tr>
+      <tr><td>全データをクリア</td><td>上の3つをまとめて</td></tr>
+    </table></div>
+    <p>詳しい集計（時間帯別の人数など）は、スプレッドシートの「集計」シートでも確認できます。</p>
+  </section>
+
+  <!-- 7 -->
+  <section id="flow">
+    <h2><span class="no">7</span>当日の流れ</h2>
+    <p class="for">主催者（本部）・全員</p>
+    <ol class="flow">
+      <li><b>リハーサルのあと、練習データを消す</b><span class="who">主催者：管理メニュー →「全データをクリア」</span></li>
+      <li><b>スタッフ全員がアプリを開き、名前と合言葉を入れる</b><span class="who">全員</span></li>
+      <li><b>各自治会の準備ができたら「準備完了」</b><span class="who">各自治会の担当：自治会状況タブ</span></li>
+      <li><b>本部の受付を開始する</b><span class="who">主催者：管理メニュー →「受付を開始する」</span></li>
+      <li><b>来た人を自治会別に数える</b><span class="who">本部受付の担当：本部受付タブ／連絡は連絡タブで</span></li>
+      <li><b>本部の受付を終了する</b><span class="who">主催者：管理メニュー →「受付を終了する…」</span></li>
+      <li><b>各自治会の受付が終わったら「受付終了」</b><span class="who">各自治会の担当：自治会状況タブ</span></li>
+      <li><b>集計を CSV で保存する</b><span class="who">主催者：管理メニュー →「CSV で保存」</span></li>
+    </ol>
+  </section>
+
+  <!-- 8 -->
+  <section id="faq">
+    <h2><span class="no">8</span>こまったとき</h2>
+    <dl class="faq">
+      <dt>「現在、ファイルを開くことができません」と出る</dt>
+      <dd>配られた <b>github.io</b> の URL（1 の URL）から開いてください。それでも開けないときは、Safari の「プライベート」や Chrome の「シークレットタブ」で開いてみてください。</dd>
+      <dt>「合言葉が違います」と出る</dt>
+      <dd>合言葉を本部に確認して、入れ直してください。</dd>
+      <dt>本部受付のボタンが押せない</dt>
+      <dd>本部の受付が「受付前」か「受付終了」です。画面上の帯を確認し、必要なら本部（主催者）に連絡してください。</dd>
+      <dt>「未送信」と出たまま</dt>
+      <dd>電波の良い場所に移動してください。つながると自動で送られます。送られるまでアプリを閉じないでください。</dd>
+      <dt>ほかの人と人数の表示が違う</dt>
+      <dd>数秒で自動的にそろいます。しばらくたっても違うときは、アプリを開き直してください。</dd>
+      <dt>ホーム画面のアイコンがかぼちゃにならない</dt>
+      <dd>一度ホーム画面から削除し、もう一度「ホーム画面に追加」をしてください。</dd>
+    </dl>
+  </section>
+
+  <footer>
+    高洲地区ハロウィンイベント 運営アプリ 取扱説明書 ／ わからないことは本部までお問い合わせください。
+  </footer>
+</main>
+</body>
+</html>
