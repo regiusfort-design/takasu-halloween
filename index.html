@@ -40,7 +40,7 @@ button{cursor:pointer}
 
 /* ヘッダー */
 .top{flex:none;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;border-bottom:1px solid var(--line)}
-.ev{font-size:12px;color:var(--muted);letter-spacing:.06em;display:flex;align-items:center;gap:6px}
+.ev{font-size:12px;color:var(--muted);letter-spacing:.06em;display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}
 .ev svg{width:15px;height:15px}
 .tag{font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--moon-ink);background:var(--moon);border-radius:4px;padding:0 5px}
 .tot{display:flex;align-items:baseline;gap:6px;margin-top:2px}
@@ -101,14 +101,21 @@ button{cursor:pointer}
 .recvbar.closed b{color:var(--bad)}
 .recvbar.open{background:var(--ok-soft);color:var(--ok);padding:8px 14px;font-weight:700}
 .recvbar button{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:12px;color:var(--text)}
-.row .closedLbl{display:none;grid-column:2 / 4;height:58px;border-radius:12px;border:1px dashed var(--line);color:var(--muted);font-size:13px;font-weight:700;align-items:center;justify-content:center;text-align:center;line-height:1.3}
-.row.closed .tap{display:none}
+.row .closedLbl{display:none;grid-column:2 / 4;min-height:58px;border-radius:12px;border:1px dashed var(--line);color:var(--muted);font-size:13px;font-weight:700;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;line-height:1.3;padding:6px}
+.row.closed .tap,.row.confirming .tap{display:none}
 .row.closed .closedLbl{display:flex}
+.row .rowconfirm{display:none;grid-column:2 / 4;gap:6px}
+.row.confirming .rowconfirm{display:flex}
+.rowconfirm .danger,.rowconfirm .undo{height:58px;font-size:13px;flex:1;padding:0 6px;white-space:normal;line-height:1.3}
+.rowconfirm .danger{flex:1.4}
+.endbtn{margin-top:6px;background:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:11px;color:var(--muted)}
+.reopenbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 12px;font-size:12px;font-weight:700;color:var(--text)}
+.endbtn:disabled,.reopenbtn:disabled,.rowconfirm button:disabled{opacity:.5}
 .row.closed .short{color:var(--muted)}
 .endtag{font-size:11px;font-weight:700;color:var(--bad);margin-left:6px;white-space:nowrap}
 
 /* マイナスモード */
-.mbtn{flex:none;height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;padding:0 14px;font-size:14px;font-weight:700;white-space:nowrap}
+.mbtn{flex:1;height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;padding:0 14px;font-size:14px;font-weight:700;white-space:nowrap}
 .mbtn[aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:#fff}
 .minusbar{display:flex;align-items:center;gap:8px;background:var(--bad-soft);color:var(--bad);border-radius:10px;padding:9px 12px;font-size:13px;font-weight:700;margin:0 0 10px;line-height:1.4}
 .minus-on .tap.k{background:transparent;color:var(--pumpkin);box-shadow:inset 0 0 0 2px var(--pumpkin)}
@@ -232,7 +239,7 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
     <div>
       <div class="ev">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7.5c-4.6 0-8 2.5-8 6.3S7.4 20.5 12 20.5s8-2.9 8-6.7-3.4-6.3-8-6.3z" fill="#FF8A1F"/><path d="M12 7.5V5.2c0-.9.7-1.7 1.7-1.7" fill="none" stroke="#5ED39B" stroke-width="1.8" stroke-linecap="round"/><path d="M9 12.5l1.2 1.3M15 12.5l-1.2 1.3M9.5 16.5c1.6 1 3.4 1 5 0" fill="none" stroke="#1C0E02" stroke-width="1.4" stroke-linecap="round"/></svg>
-        <span>高洲地区ハロウィン</span>
+        <span>高洲地区ハロウィンイベント</span>
         <span id="demoTag" class="tag" hidden>デモ</span>
         <span id="phasePill" class="phase" hidden></span>
       </div>
@@ -253,12 +260,11 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
           <p class="hint">住んでいる自治会の <span class="k">子ども</span> か <span class="a">大人</span> を、1人につき1回タップ</p>
           <span id="syncState" class="sync"></span>
         </div>
-        <div id="minusBar" class="minusbar" hidden>マイナスモード中：タップすると1人ずつ減ります。終わったら下の「終了」を押してください。</div>
+        <div id="minusBar" class="minusbar" hidden>人数を減らすモード中：減らしたいボタンを押すと1人ずつ減ります。終わったら下の「減らすのをやめる」を押してください。</div>
         <div id="rows" class="rows"></div>
       </div>
       <div class="dock">
-        <button id="minusBtn" class="mbtn" type="button" aria-pressed="false">−1 修正</button>
-        <button id="undoBtn" class="undo" type="button" disabled><span>直前を取り消す</span><small id="undoWhat"></small></button>
+        <button id="minusBtn" class="mbtn" type="button" aria-pressed="false">まちがえた人数を減らす</button>
       </div>
     </section>
 
@@ -300,7 +306,7 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
 
 <div id="setup" class="setup" hidden>
   <form id="setupForm" class="setup-card" autocomplete="off">
-    <div class="ev">高洲地区ハロウィン</div>
+    <div class="ev">高洲地区ハロウィンイベント</div>
     <h1>運営アプリ</h1>
     <label for="nameIn">あなたの名前・係</label>
     <input id="nameIn" maxlength="20" placeholder="例：受付 山田">
@@ -341,9 +347,7 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
         </div>
       </div>
 
-      <h2>自治会ごとの終了</h2>
-      <p class="help" style="margin:0 0 4px">その自治会だけ受付ボタンを押せなくします。「再開」で元に戻せます。</p>
-      <div id="grpCtl" class="grp-ctl"></div>
+      <p class="help" style="margin:8px 0 0">自治会ごとの受付終了は、「受付」画面の各自治会の「受付終了」ボタンで行います。</p>
 
       <h2>CSVで保存</h2>
       <div class="adm-list">
@@ -394,7 +398,6 @@ const S = {
   server: { ver: 0, counts: {}, recent: [] },
   pend: store.get('pend', []),     // まだ送っていないタップ（まとめ中）
   queue: store.get('queue', []),   // 送信待ちの操作（順番に送る）
-  undo: store.get('undo', []),     // この端末で受付した順番
   inflight: null,
   msgs: [], seqSet: new Set(), lastSeq: 0, seenSeq: store.get('seenSeq', 0), out: [],
   tab: store.get('tab', 'status'), // 受付は担当者だけが使うので、最初は「状況」を開く
@@ -405,7 +408,7 @@ const S = {
   adminPass: null,                 // 管理パスワード（この画面を開いている間だけ保持）
 };
 if (!S.dev) { S.dev = uid(); store.set('dev', S.dev); }
-function save() { store.set('pend', S.pend); store.set('queue', S.queue); store.set('undo', S.undo); }
+function save() { store.set('pend', S.pend); store.set('queue', S.queue); }
 
 // ---------- DOM ヘルパー ----------
 const $ = s => document.querySelector(s);
@@ -521,6 +524,7 @@ function renderRecv() {
   if (!r || r.legacy) { pill.hidden = true; bar.hidden = true; return; }
   const label = { before: '受付前', open: '受付中', closed: '受付終了' }[r.phase];
   pill.className = 'phase ' + r.phase; pill.textContent = label; pill.hidden = false;
+  bar.hidden = false;
   const sig = JSON.stringify(r);
   if (bar.dataset.sig === sig) return;
   bar.dataset.sig = sig;
@@ -546,7 +550,6 @@ function checkEpoch(epoch) {
   const first = S.epoch == null;
   S.epoch = epoch; store.set('epoch', epoch);
   if (first) return;
-  S.undo = []; save();
   S.msgs = []; S.seqSet = new Set(); S.lastSeq = 0;
   S.seenSeq = 0; store.set('seenSeq', 0);
   S.server = { ver: 0, counts: {}, recent: [] };
@@ -567,8 +570,6 @@ function tap(g, t, btn) {
   let e = S.pend.find(x => x.g === g && x.t === t && Math.sign(x.n) === s && now - x.ts < 2500);
   if (e) e.n += s;
   else { e = { id: uid(), g, t, n: s, ts: now }; S.pend.push(e); }
-  S.undo.push({ id: e.id, g, t, s });
-  if (S.undo.length > 40) S.undo.shift();
   save();
   scheduleFlush();
   renderCounts(true);
@@ -585,7 +586,7 @@ function setMinus(on) {
   $('#minusBar').hidden = !on;
   const b = $('#minusBtn');
   b.setAttribute('aria-pressed', String(on));
-  b.textContent = on ? '終了' : '−1 修正';
+  b.textContent = on ? '減らすのをやめる' : 'まちがえた人数を減らす';
   Object.values(S.rowEls).forEach(r => {
     r.lk.textContent = on ? '子ども −1' : '子ども';
     r.la.textContent = on ? '大人 −1' : '大人';
@@ -596,7 +597,7 @@ function setMinus(on) {
 // 押し忘れ防止：20秒なにもしなければ通常モードに戻す
 function armMinusTimer() {
   clearTimeout(S.minusTimer);
-  S.minusTimer = setTimeout(() => { if (S.minus) { setMinus(false); toast('マイナスモードを終了しました'); } }, 20000);
+  S.minusTimer = setTimeout(() => { if (S.minus) { setMinus(false); toast('人数を減らすモードを終わりました'); } }, 20000);
 }
 
 // 連続タップは少しまとめてから送る（最大2秒待ち）
@@ -642,37 +643,6 @@ async function pump() {
   renderCounts();
 }
 
-function doUndo() {
-  const u = S.undo[S.undo.length - 1];
-  if (!u) return;
-  const s = u.s || 1;
-  if (s > 0 && effective()[u.g] && effective()[u.g][u.t] <= 0) {
-    S.undo.pop(); save(); renderDock();
-    toast('すでに0人のため取り消せません'); return;
-  }
-  S.undo.pop();
-  let done = false;
-  const p = S.pend.find(e => e.id === u.id);
-  if (p) {
-    p.n -= s; if (p.n === 0) S.pend = S.pend.filter(e => e !== p);
-    done = true;
-  }
-  if (!done) {
-    for (const op of S.queue) {
-      if (op === S.inflight || op.kind !== 'rec') continue;
-      const it = op.items.find(e => e.id === u.id);
-      if (it) { it.n -= s; if (it.n === 0) op.items = op.items.filter(e => e !== it); done = true; break; }
-    }
-    S.queue = S.queue.filter(op => op === S.inflight || op.kind !== 'rec' || op.items.length);
-  }
-  if (!done) S.queue.push({ kind: 'undo', id: u.id, g: u.g, t: u.t, s });
-  save(); renderCounts();
-  const g = S.gmap[u.g];
-  const name = (g ? g.short : '') + '　' + TYPE_LABEL[u.t];
-  toast(s > 0 ? name + 'を1名取り消しました' : name + 'の −1 を取り消しました（+1）');
-  pump();
-}
-
 // ---------- 定期更新 ----------
 function kickPoll() { clearTimeout(S.pollTimer); const gen = ++S.pollGen; poll(gen); }
 async function poll(gen) {
@@ -711,12 +681,24 @@ function buildGroups() {
     const ba = h('button', { class: 'tap a', type: 'button', 'aria-label': g.name + '　大人' }, la);
     bk.addEventListener('click', () => tap(g.key, 'k', bk));
     ba.addEventListener('click', () => tap(g.key, 'a', ba));
-    const cl = h('div', { class: 'closedLbl' });
+    // 自治会ごとの受付終了（押すと確認ボタンに切り替わる）
+    const endBtn = h('button', { class: 'endbtn', type: 'button' }, '受付終了');
+    endBtn.addEventListener('click', () => askGroupEnd(g.key));
+    const yes = h('button', { class: 'danger', type: 'button' }, '終了する');
+    const no = h('button', { class: 'undo', type: 'button' }, 'やめる');
+    yes.addEventListener('click', () => groupAction('closeGroup', g.key));
+    no.addEventListener('click', () => { S.confirmG = null; renderCounts(); });
+    const cf = h('div', { class: 'rowconfirm' }, yes, no);
+    // 終了した自治会の表示と再開ボタン
+    const clText = h('span');
+    const reopen = h('button', { class: 'reopenbtn', type: 'button' }, '再開する');
+    reopen.addEventListener('click', () => groupAction('openGroup', g.key));
+    const cl = h('div', { class: 'closedLbl' }, clText, reopen);
     const row = h('div', { class: 'row' + (g.key === 'other' ? ' other' : '') },
-      h('div', null, h('div', { class: 'short', text: g.short }), h('div', { class: 'gc' }, ck, '　', ca)),
-      bk, ba, cl);
+      h('div', null, h('div', { class: 'short', text: g.short }), h('div', { class: 'gc' }, ck, '　', ca), endBtn),
+      bk, ba, cf, cl);
     rows.append(row);
-    S.rowEls[g.key] = { row, ck, ca, bk, ba, lk, la, cl };
+    S.rowEls[g.key] = { row, ck, ca, bk, ba, lk, la, cl, clText, endBtn, yes, no, reopen };
 
     const iK = h('i', { class: 'k' }), iA = h('i', { class: 'a' });
     const num = h('span', { class: 'num' }, '0'), sub = h('small');
@@ -752,8 +734,14 @@ function renderCounts(fromTap) {
     const ok = acceptsPlus(g.key), closedAt = groupClosedAt(g.key);
     r.bk.disabled = S.minus ? v.k <= 0 : !ok;
     r.ba.disabled = S.minus ? v.a <= 0 : !ok;
+    const rv = recvInfo(), busy = S.grpBusy === g.key;
     r.row.classList.toggle('closed', !S.minus && !!closedAt);
-    r.cl.textContent = closedAt ? '受付終了（' + hhmm(closedAt) + '）' : '';
+    r.row.classList.toggle('confirming', !S.minus && !closedAt && S.confirmG === g.key);
+    r.clText.textContent = closedAt ? '受付終了（' + hhmm(closedAt) + '）' : '';
+    r.endBtn.hidden = S.minus || !!closedAt || !rv || rv.legacy || rv.phase !== 'open';
+    r.endBtn.disabled = r.yes.disabled = r.reopen.disabled = busy;
+    r.reopen.textContent = busy ? '処理中…' : '再開する';
+    r.yes.textContent = busy ? '処理中…' : 'この自治会を終了';
     b.tag.textContent = closedAt ? '終了' : '';
     b.num.textContent = v.k + v.a;
     b.sub.textContent = '子ども' + v.k + '・大人' + v.a;
@@ -778,11 +766,6 @@ function renderFeed() {
 }
 
 function renderDock() {
-  const u = S.undo[S.undo.length - 1];
-  $('#undoBtn').disabled = !u;
-  $('#undoWhat').textContent = u
-    ? ((S.gmap[u.g] ? S.gmap[u.g].short : '') + ' ' + TYPE_LABEL[u.t] + ((u.s || 1) < 0 ? ' −1' : ''))
-    : '';
   const n = S.pend.reduce((s, e) => s + Math.abs(e.n), 0)
     + S.queue.reduce((s, op) => s + (op.kind === 'rec' ? op.items.reduce((x, e) => x + Math.abs(e.n), 0) : 1), 0);
   const el = $('#syncState');
@@ -914,17 +897,31 @@ function renderAdminRecv() {
   btn.hidden = !$('#closeConfirm').hidden;
   if (r.phase === 'open') { btn.className = 'danger-outline'; btn.textContent = '受付を終了する…'; }
   else { btn.className = 'primary'; btn.textContent = r.phase === 'closed' ? '受付を再開する' : '受付を開始する'; }
+}
 
-  const box = $('#grpCtl');
-  box.textContent = '';
-  S.groups.forEach(g => {
-    const at = r.groupsClosed && r.groupsClosed[g.key];
-    const b = h('button', { type: 'button', class: at ? 'reopen' : '' }, at ? '再開' : '終了');
-    b.disabled = !!S.admBusy;
-    b.addEventListener('click', () => recvAction(at ? 'openGroup' : 'closeGroup', g.key));
-    box.append(h('div', { class: 'gr' + (at ? ' is-closed' : '') },
-      h('div', null, g.short, h('small', null, at ? '受付終了（' + hhmm(at) + '）' : '受付できます')), b));
-  });
+// 受付画面：自治会ごとの終了・再開（管理パスワード不要）
+function askGroupEnd(g) {
+  S.confirmG = g;
+  clearTimeout(S.confirmTimer);
+  S.confirmTimer = setTimeout(() => { if (S.confirmG === g) { S.confirmG = null; renderCounts(); } }, 8000);
+  renderCounts();
+}
+async function groupAction(action, g) {
+  S.confirmG = null;
+  S.grpBusy = g; renderCounts();
+  try {
+    const st = await call('groupReception', auth(), action, g);
+    applyState(st);
+    const name = S.gmap[g] ? S.gmap[g].short : '';
+    toast(name + (action === 'closeGroup' ? ' の受付を終了しました' : ' の受付を再開しました'));
+    kickPoll(); // 自動のお知らせメッセージをすぐ取り込む
+  } catch (e) {
+    if (isAuth(e)) showSetup(errText(e));
+    else toast(isApp(e) ? errText(e) : '接続できませんでした。もう一度お試しください');
+  } finally {
+    S.grpBusy = null;
+    renderCounts();
+  }
 }
 
 async function recvAction(action, g) {
@@ -936,8 +933,7 @@ async function recvAction(action, g) {
     applyState(st);
     $('#closeConfirm').hidden = true;
     const grp = g && S.gmap[g] ? S.gmap[g].short + ' の' : '';
-    toast({ open: '受付を開始しました', close: '受付を終了しました',
-      closeGroup: grp + '受付を終了しました', openGroup: grp + '受付を再開しました' }[action]);
+    toast({ open: '受付を開始しました', close: '受付を終了しました' }[action] || grp + '受付を更新しました');
     kickPoll(); // 自動のお知らせメッセージをすぐ取り込む
   } catch (e) {
     if (isApp(e) && /管理パスワード/.test(msgOf(e))) S.adminPass = null;
@@ -1097,13 +1093,12 @@ async function boot() {
   if (!HAS_GAS && !DEMO && !API_URL) {
     const card = $('#setupForm');
     card.textContent = '';
-    card.append(h('div', { class: 'ev' }, '高洲地区ハロウィン'), h('h1', null, '運営アプリ'),
+    card.append(h('div', { class: 'ev' }, '高洲地区ハロウィンイベント'), h('h1', null, '運営アプリ'),
       h('p', { class: 'err' }, '接続先が設定されていません。配布された URL から開いてください。'));
     $('#setup').hidden = false;
     return;
   }
   document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
-  $('#undoBtn').addEventListener('click', doUndo);
   $('#minusBtn').addEventListener('click', () => setMinus(!S.minus));
   $('#adminOpen').addEventListener('click', openAdmin);
   $('#admClose').addEventListener('click', closeAdmin);
@@ -1193,7 +1188,7 @@ const Mock = (function () {
   const fmt = ts => { const d = new Date(ts); return d.toLocaleDateString('ja-JP') + ' ' + d.toLocaleTimeString('ja-JP'); };
   const bump = () => { db.ver = Math.max(Date.now(), db.ver + 1); };
   return {
-    async getConfig() { await wait(); return { eventName: '高洲地区ハロウィン', needPass: false, groups: GROUPS }; },
+    async getConfig() { await wait(); return { eventName: '高洲地区ハロウィンイベント', needPass: false, groups: GROUPS }; },
     async sync(a, last) { await wait(); db = store.get('demo_db', db); return { state: state(), epoch: db.epoch || '0', msgs: db.msgs.filter(m => m.seq > last) }; },
     async record(a, items) {
       await wait();
@@ -1240,8 +1235,14 @@ const Mock = (function () {
       db.recv = { phase: 'before', openedAt: null, closedAt: null, groupsClosed: {} };
       bump(); persist(); return state();
     },
+    async groupReception(a, action, g) {
+      await wait(); return this.changeRecv(a, action, g);
+    },
     async adminReception(a, p, action, g) {
-      await wait(); admin(p); state();
+      await wait(); admin(p); return this.changeRecv(a, action, g);
+    },
+    changeRecv(a, action, g) {
+      state();
       const r = db.recv, now = Date.now(), grp = GROUPS.find(x => x.key === g);
       let text;
       if (action === 'open') { text = r.phase === 'closed' ? '受付を再開しました' : '受付を開始しました'; r.phase = 'open'; r.openedAt = r.openedAt || now; r.closedAt = null; }
