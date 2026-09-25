@@ -123,7 +123,7 @@ button{cursor:pointer}
 .hq.closed{background:var(--bad);color:#fff}
 .gbar .nm .phase{margin-left:6px;vertical-align:1px}
 
-/* 自治会受付タブ */
+/* 自治会状況タブ */
 .grow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:12px 12px 12px 14px}
 .grow + .grow{border-top:1px solid var(--line)}
 .grow .gname{font-weight:700;font-size:15px;line-height:1.3;word-break:keep-all;overflow-wrap:anywhere}
@@ -234,6 +234,9 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
 .adm-btn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;font-weight:700}
 .adm-btn small{font-size:12px;font-weight:400;color:var(--muted)}
 .adm-btn:disabled{opacity:.5}
+.adm-btn.dz{color:var(--bad);border-color:rgba(255,94,110,.35)}
+.adm-btn.dz.all{background:var(--bad-soft)}
+#clearConfirm{margin-top:10px}
 .danger-outline{height:48px;border-radius:12px;background:transparent;border:1px solid var(--bad);color:var(--bad);font-weight:700;font-size:15px}
 .danger{height:48px;border-radius:12px;border:0;background:var(--bad);color:#fff;font-weight:800;font-size:15px;flex:1}
 .confirm{background:var(--bad-soft);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px}
@@ -292,7 +295,7 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
       </div>
     </section>
 
-    <section id="v-groups" class="view" aria-label="自治会受付" hidden>
+    <section id="v-groups" class="view" aria-label="自治会状況" hidden>
       <div class="scroll">
         <p class="hint">各自治会の担当の方が操作します。準備ができたら <b>準備完了</b>、受付が終わったら <b>受付終了</b> を押してください。</p>
         <div id="grpList" class="rows"></div>
@@ -329,7 +332,7 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
   <nav class="tabs" role="tablist">
     <button type="button" role="tab" data-tab="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-5"/></svg>状況</button>
     <button type="button" role="tab" data-tab="reception"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16v3.2a2.3 2.3 0 0 0 0 4.6v3.2H4v-3.2a2.3 2.3 0 0 0 0-4.6z"/><path d="M9.5 12l1.8 1.8 3.3-3.6"/></svg>本部受付</button>
-    <button type="button" role="tab" data-tab="groups"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l5-3 5 3v11M14 20V4l6 3v13M3 20h18M7 12h4M7 16h4M17 11v.01M17 15v.01"/></svg>自治会受付</button>
+    <button type="button" role="tab" data-tab="groups"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l5-3 5 3v11M14 20V4l6 3v13M3 20h18M7 12h4M7 16h4M17 11v.01M17 15v.01"/></svg>自治会状況</button>
     <button type="button" role="tab" data-tab="chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v11H10l-4.5 3.5v-3.5H4z"/></svg>連絡<span id="badge" class="badge" hidden>0</span></button>
   </nav>
 </div>
@@ -380,7 +383,7 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
         </div>
       </div>
 
-      <p class="help" style="margin:8px 0 0">自治会ごとの準備完了・受付終了は、「自治会受付」タブで行います。</p>
+      <p class="help" style="margin:8px 0 0">自治会ごとの準備完了・受付終了は、「自治会状況」タブで行います。</p>
 
       <h2>CSVで保存</h2>
       <div class="adm-list">
@@ -391,10 +394,15 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
       <p id="admCsvMsg" class="ok-msg" hidden></p>
 
       <h2>データをクリア</h2>
-      <p class="help" style="margin:0 0 10px">受付とメッセージをすべて削除します。スプレッドシートからも消え、元に戻せません。先に CSV で保存しておくと安心です。</p>
-      <button id="clearBtn" class="danger-outline" type="button" style="width:100%">データをクリア…</button>
+      <p class="help" style="margin:0 0 10px">スプレッドシートからも消え、元に戻せません。先に CSV で保存しておくと安心です。</p>
+      <div id="clearList" class="adm-list">
+        <button class="adm-btn dz" type="button" data-clear="log">受付の人数をクリア<small>受付ログを消します。自治会別の集計も0人に戻ります</small></button>
+        <button class="adm-btn dz" type="button" data-clear="messages">メッセージをクリア<small>連絡タブのやり取りを消します</small></button>
+        <button class="adm-btn dz" type="button" data-clear="status">受付状況をリセット<small>本部を「受付前」、各自治会を「準備中」に戻します</small></button>
+        <button class="adm-btn dz all" type="button" data-clear="all">全データをクリア<small>上の3つをまとめて行います</small></button>
+      </div>
       <div id="clearConfirm" class="confirm" hidden>
-        <p><b>本当にすべて削除しますか？</b><br>全スタッフの画面が0人に戻り、メッセージも消えます。</p>
+        <p><b id="clearQ"></b><br><span id="clearNote"></span></p>
         <div class="confirm-row">
           <button id="clearNo" class="undo" type="button">やめる</button>
           <button id="clearYes" class="danger" type="button">削除する</button>
@@ -593,11 +601,14 @@ function renderRecv() {
   }
 }
 
-// ---------- 自治会受付タブ ----------
+// ---------- 自治会状況タブ ----------
+// 「その他・地区外」は自治会ではないので、自治会状況の対象にしない
+const isAssoc = g => (g.assoc === undefined ? g.key !== 'other' : g.assoc);
+
 function buildGroupList() {
   const list = $('#grpList');
   list.textContent = '';
-  S.groups.forEach(g => {
+  S.groups.filter(isAssoc).forEach(g => {
     const pill = h('span', { class: 'phase' }), time = h('span');
     const mk = (cls, text, fn) => { const b = h('button', { class: 'gbtn ' + cls, type: 'button' }, text); b.addEventListener('click', fn); return b; };
     const ready = mk('ready', '準備完了', () => groupAction('readyGroup', g.key));
@@ -776,7 +787,7 @@ function buildGroups() {
     const ba = h('button', { class: 'tap a', type: 'button', 'aria-label': g.name + '　大人' }, la);
     bk.addEventListener('click', () => tap(g.key, 'k', bk));
     ba.addEventListener('click', () => tap(g.key, 'a', ba));
-    // 自治会の受付が終了したときの表示（終了・再開は「自治会受付」タブで行う）
+    // 自治会の受付が終了したときの表示（終了・再開は「自治会状況」タブで行う）
     const cl = h('div', { class: 'closedLbl' });
     const row = h('div', { class: 'row' + (g.key === 'other' ? ' other' : '') },
       h('div', null, h('div', { class: 'short', text: g.short }), h('div', { class: 'gc' }, ck, '　', ca)),
@@ -821,7 +832,7 @@ function renderCounts(fromTap) {
     r.row.classList.toggle('closed', !S.minus && !!closedAt);
     r.cl.textContent = closedAt ? '受付終了（' + hhmm(closedAt) + '）' : '';
     const rv = recvInfo(), st = groupStage(g.key);
-    b.tag.hidden = !rv || !!rv.legacy;
+    b.tag.hidden = !rv || !!rv.legacy || !isAssoc(g);
     b.tag.className = 'phase ' + STAGE[st].cls;
     b.tag.textContent = STAGE[st].label;
     b.num.textContent = v.k + v.a;
@@ -950,7 +961,7 @@ function openAdmin() {
   $('#admErr').hidden = true;
   $('#admCsvMsg').hidden = true;
   $('#clearConfirm').hidden = true;
-  $('#clearBtn').hidden = false;
+  $('#clearList').hidden = false;
   $('#closeConfirm').hidden = true;
   const unlocked = !!S.adminPass;
   $('#admLock').hidden = unlocked;
@@ -1076,7 +1087,7 @@ function saveFile(filename, text) {
 async function onExport(btn) {
   const msg = $('#admCsvMsg'), err = $('#admErr');
   msg.hidden = true; err.hidden = true;
-  document.querySelectorAll('.adm-btn').forEach(b => { b.disabled = true; });
+  document.querySelectorAll('.adm-btn[data-kind]').forEach(b => { b.disabled = true; });
   try {
     const r = await call('adminExport', auth(), S.adminPass, btn.dataset.kind);
     saveFile(r.filename, toCsv(r.rows));
@@ -1086,29 +1097,50 @@ async function onExport(btn) {
     if (isApp(e) && /管理パスワード/.test(msgOf(e))) S.adminPass = null;
     admError(e, err);
   } finally {
-    document.querySelectorAll('.adm-btn').forEach(b => { b.disabled = false; });
+    document.querySelectorAll('.adm-btn[data-kind]').forEach(b => { b.disabled = false; });
   }
 }
 
+// データクリアの種類ごとの確認文
+const CLEAR = {
+  log: { q: '受付の人数をクリアしますか？', note: '受付ログを消し、全スタッフの画面の人数と自治会別の集計が0人に戻ります。', done: '受付の人数をクリアしました' },
+  messages: { q: 'メッセージをクリアしますか？', note: '連絡タブのやり取りがすべて消えます。', done: 'メッセージをクリアしました' },
+  status: { q: '受付状況をリセットしますか？', note: '本部（高洲中央公園）が「受付前」、各自治会が「準備中」に戻ります。人数とメッセージは消えません。', done: '受付状況をリセットしました' },
+  all: { q: '全データをクリアしますか？', note: '受付の人数・メッセージ・受付状況をすべて消し、最初の状態に戻します。', done: '全データをクリアしました' },
+};
+function askClear(kind) {
+  S.clearKind = kind;
+  $('#clearQ').textContent = CLEAR[kind].q;
+  $('#clearNote').textContent = CLEAR[kind].note;
+  $('#clearYes').textContent = kind === 'status' ? 'リセットする' : '削除する';
+  $('#clearList').hidden = true;
+  $('#clearConfirm').hidden = false;
+  $('#admCsvMsg').hidden = true;
+}
+function cancelClear() { $('#clearConfirm').hidden = true; $('#clearList').hidden = false; }
+
 async function onClear() {
+  const kind = S.clearKind || 'all';
   const yes = $('#clearYes'), err = $('#admErr');
-  yes.disabled = true; yes.textContent = '削除中…'; err.hidden = true;
+  const label = yes.textContent;
+  yes.disabled = true; yes.textContent = '処理中…'; err.hidden = true;
   try {
-    // この端末の送信待ちのタップも一緒に破棄する
-    clearTimeout(S.flushTimer);
-    S.pend = []; S.queue = S.queue.filter(op => op === S.inflight); save();
-    const st = await call('adminClear', auth(), S.adminPass);
+    if (kind === 'log' || kind === 'all') {
+      // この端末の送信待ちのタップも一緒に破棄する
+      clearTimeout(S.flushTimer);
+      S.pend = []; S.queue = S.queue.filter(op => op === S.inflight); save();
+    }
+    const st = await call('adminClear', auth(), S.adminPass, kind);
     applyState(st);
     renderCounts();
-    $('#clearConfirm').hidden = true;
-    $('#clearBtn').hidden = false;
+    cancelClear();
     const msg = $('#admCsvMsg');
-    msg.textContent = 'データをクリアしました';
+    msg.textContent = CLEAR[kind].done;
     msg.hidden = false;
   } catch (e) {
     admError(e, err);
   } finally {
-    yes.disabled = false; yes.textContent = '削除する';
+    yes.disabled = false; yes.textContent = label;
   }
 }
 
@@ -1184,9 +1216,9 @@ async function boot() {
   $('#adminOpen').addEventListener('click', openAdmin);
   $('#admClose').addEventListener('click', closeAdmin);
   $('#admLock').addEventListener('submit', onAdminUnlock);
-  document.querySelectorAll('.adm-btn').forEach(b => b.addEventListener('click', () => onExport(b)));
-  $('#clearBtn').addEventListener('click', () => { $('#clearBtn').hidden = true; $('#clearConfirm').hidden = false; $('#admCsvMsg').hidden = true; });
-  $('#clearNo').addEventListener('click', () => { $('#clearConfirm').hidden = true; $('#clearBtn').hidden = false; });
+  document.querySelectorAll('.adm-btn[data-kind]').forEach(b => b.addEventListener('click', () => onExport(b)));
+  document.querySelectorAll('[data-clear]').forEach(b => b.addEventListener('click', () => askClear(b.dataset.clear)));
+  $('#clearNo').addEventListener('click', cancelClear);
   $('#clearYes').addEventListener('click', onClear);
   $('#phaseBtn').addEventListener('click', onPhaseBtn);
   $('#closeNo').addEventListener('click', () => { $('#closeConfirm').hidden = true; renderAdminRecv(); });
@@ -1239,7 +1271,7 @@ const Mock = (function () {
     { key: 'stage', short: 'パークハウス ステージ', name: 'ザ・パークハウスステージ新浦安自治会' },
     { key: 'marine', short: 'パークハウス マリンヴィラ', name: 'ザ・パークハウス新浦安マリンヴィラ自治会' },
     { key: 'regias', short: 'レジアスフォート', name: 'レジアスフォート新浦安自治会' },
-    { key: 'other', short: 'その他・地区外', name: 'その他・地区外' },
+    { key: 'other', short: 'その他・地区外', name: 'その他・地区外', assoc: false },
   ];
   let db = store.get('demo_db', null);
   const persist = () => store.set('demo_db', db);
@@ -1312,10 +1344,13 @@ const Mock = (function () {
       return { filename: 'デモ_メッセージ.csv', rows: [['No', '日時', '名前', 'メッセージ']]
         .concat(db.msgs.map(m => [m.seq, fmt(m.ts), m.name, m.text])) };
     },
-    async adminClear(a, p) {
+    async adminClear(a, p, kind) {
       await wait(); admin(p);
-      db.rows = []; db.msgs = []; db.epoch = String(Date.now());
-      db.recv = { phase: 'before', openedAt: null, closedAt: null, groupsReady: {}, groupsClosed: {} };
+      kind = kind || 'all';
+      if (kind === 'all' || kind === 'log') db.rows = [];
+      if (kind === 'all' || kind === 'messages') db.msgs = [];
+      if (kind === 'all' || kind === 'status') db.recv = { phase: 'before', openedAt: null, closedAt: null, groupsReady: {}, groupsClosed: {} };
+      if (kind !== 'status') db.epoch = String(Date.now());
       bump(); persist(); return state();
     },
     async groupReception(a, action, g) {
