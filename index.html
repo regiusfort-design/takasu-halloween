@@ -114,6 +114,30 @@ button{cursor:pointer}
 .row.closed .short{color:var(--muted)}
 .endtag{font-size:11px;font-weight:700;color:var(--bad);margin-left:6px;white-space:nowrap}
 
+/* 状況：本部（高洲中央公園）の受付状態 */
+.hq{border-radius:14px;padding:12px 14px;margin:0 0 16px;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px}
+.hq .hq-t{font-size:16px;font-weight:800;line-height:1.4}
+.hq .hq-s{font-size:12px;opacity:.85}
+.hq.before{background:var(--surface-2);color:var(--muted)}
+.hq.open{background:var(--ok-soft);color:var(--ok)}
+.hq.closed{background:var(--bad);color:#fff}
+.gbar .nm .phase{margin-left:6px;vertical-align:1px}
+
+/* 自治会受付タブ */
+.grow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;align-items:center;padding:12px 12px 12px 14px}
+.grow + .grow{border-top:1px solid var(--line)}
+.grow .gname{font-weight:700;font-size:15px;line-height:1.3;word-break:keep-all;overflow-wrap:anywhere}
+.grow .gstat{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin-top:4px;font-size:11px;color:var(--muted)}
+.grow .acts{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.gbtn{height:48px;border-radius:12px;padding:0 14px;font-weight:800;font-size:14px;border:0;white-space:nowrap}
+.gbtn.ready{background:var(--ok);color:#06210F}
+.gbtn.end{background:transparent;border:1px solid var(--bad);color:var(--bad)}
+.gbtn.yes{background:var(--bad);color:#fff}
+.gbtn.no,.gbtn.reopen{background:transparent;border:1px solid var(--line);color:var(--text)}
+.gbtn:disabled{opacity:.5}
+.linkish{grid-column:1 / -1;justify-self:end;background:none;border:0;color:var(--muted);font-size:12px;text-decoration:underline;padding:0}
+.grow.closed .gname{color:var(--muted)}
+
 /* マイナスモード */
 .mbtn{flex:1;height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;padding:0 14px;font-size:14px;font-weight:700;white-space:nowrap}
 .mbtn[aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:#fff}
@@ -175,7 +199,7 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
 .composer button:disabled{opacity:.4}
 
 /* タブ */
-.tabs{flex:none;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:var(--surface);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs{flex:none;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:var(--surface);padding-bottom:env(safe-area-inset-bottom,0px)}
 .tabs button{position:relative;background:none;border:0;padding:7px 0 9px;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:12px;color:var(--muted)}
 .tabs button[aria-selected="true"]{color:var(--pumpkin)}
 .tabs svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -253,7 +277,7 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
   </header>
 
   <main class="views">
-    <section id="v-reception" class="view" aria-label="受付">
+    <section id="v-reception" class="view" aria-label="本部受付">
       <div class="scroll">
         <div id="recvBar" class="recvbar" hidden></div>
         <div class="hintbar">
@@ -268,14 +292,22 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
       </div>
     </section>
 
+    <section id="v-groups" class="view" aria-label="自治会受付" hidden>
+      <div class="scroll">
+        <p class="hint">各自治会の担当の方が操作します。準備ができたら <b>準備完了</b>、受付が終わったら <b>受付終了</b> を押してください。</p>
+        <div id="grpList" class="rows"></div>
+      </div>
+    </section>
+
     <section id="v-status" class="view" aria-label="状況" hidden>
       <div class="scroll">
+        <div id="hqCard" class="hq" hidden></div>
         <div class="sum">
           <div class="sum-n"><span id="sTotal" class="num">0</span><span>人 受付済</span></div>
           <div class="stack"><i id="sStackK" class="k"></i><i id="sStackA" class="a"></i></div>
           <div class="legend"><span><span class="dot k"></span>子ども<b id="sKids">0</b></span><span><span class="dot a"></span>大人<b id="sAdults">0</b></span></div>
         </div>
-        <h2>自治会別</h2>
+        <h2>自治会別（人数・受付状況）</h2>
         <div id="groupBars"></div>
         <h2>最近の受付</h2>
         <ol id="feed" class="feed"></ol>
@@ -296,7 +328,8 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
 
   <nav class="tabs" role="tablist">
     <button type="button" role="tab" data-tab="status"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-5"/></svg>状況</button>
-    <button type="button" role="tab" data-tab="reception"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16v3.2a2.3 2.3 0 0 0 0 4.6v3.2H4v-3.2a2.3 2.3 0 0 0 0-4.6z"/><path d="M9.5 12l1.8 1.8 3.3-3.6"/></svg>受付</button>
+    <button type="button" role="tab" data-tab="reception"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16v3.2a2.3 2.3 0 0 0 0 4.6v3.2H4v-3.2a2.3 2.3 0 0 0 0-4.6z"/><path d="M9.5 12l1.8 1.8 3.3-3.6"/></svg>本部受付</button>
+    <button type="button" role="tab" data-tab="groups"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l5-3 5 3v11M14 20V4l6 3v13M3 20h18M7 12h4M7 16h4M17 11v.01M17 15v.01"/></svg>自治会受付</button>
     <button type="button" role="tab" data-tab="chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v11H10l-4.5 3.5v-3.5H4z"/></svg>連絡<span id="badge" class="badge" hidden>0</span></button>
   </nav>
 </div>
@@ -336,18 +369,18 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
     <div id="admBody" hidden>
       <p id="admErr" class="err" hidden></p>
 
-      <h2>受付の開始・終了</h2>
+      <h2>本部（高洲中央公園）の受付</h2>
       <div class="phase-now">いまの状態 <span id="admPhase" class="phase"></span><small id="admPhaseTime"></small></div>
       <button id="phaseBtn" class="primary" type="button">受付を開始する</button>
       <div id="closeConfirm" class="confirm" hidden>
-        <p><b>受付を終了しますか？</b><br>全スタッフの受付ボタンが押せなくなります。あとで再開もできます。</p>
+        <p><b>本部（高洲中央公園）の受付を終了しますか？</b><br>本部受付のボタンが押せなくなり、状況画面に「本部（高洲中央公園）受付終了」と表示されます。あとで再開もできます。</p>
         <div class="confirm-row">
           <button id="closeNo" class="undo" type="button">やめる</button>
           <button id="closeYes" class="danger" type="button">終了する</button>
         </div>
       </div>
 
-      <p class="help" style="margin:8px 0 0">自治会ごとの受付終了は、「受付」画面の各自治会の「受付終了」ボタンで行います。</p>
+      <p class="help" style="margin:8px 0 0">自治会ごとの準備完了・受付終了は、「自治会受付」タブで行います。</p>
 
       <h2>CSVで保存</h2>
       <div class="adm-list">
@@ -392,7 +425,7 @@ const store = {
 const uid = () => 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 
 const S = {
-  cfg: null, groups: [], gmap: {}, rowEls: {}, barEls: {},
+  cfg: null, groups: [], gmap: {}, rowEls: {}, barEls: {}, grpEls: {},
   me: store.get('me', null),
   dev: store.get('dev', null),
   server: { ver: 0, counts: {}, recent: [] },
@@ -502,9 +535,18 @@ function applyState(st) {
 // null = まだ読み込み中。サーバーが古い版（受付状態なし）のときは常に受付中として扱う
 function recvInfo() {
   if (!S.gotState) return null;
-  return S.server.recv || { phase: 'open', groupsClosed: {}, legacy: true };
+  return S.server.recv || { phase: 'open', groupsReady: {}, groupsClosed: {}, legacy: true };
 }
+const hqName = () => (S.cfg && S.cfg.hqName) || '本部（高洲中央公園）';
 function groupClosedAt(g) { const r = recvInfo(); return r && r.groupsClosed ? r.groupsClosed[g] || null : null; }
+function groupReadyAt(g) { const r = recvInfo(); return r && r.groupsReady ? r.groupsReady[g] || null : null; }
+// 自治会の受付状況：prep（準備中）/ ready（準備完了）/ closed（受付終了）
+function groupStage(g) { return groupClosedAt(g) ? 'closed' : groupReadyAt(g) ? 'ready' : 'prep'; }
+const STAGE = {
+  prep: { label: '準備中', cls: 'before' },
+  ready: { label: '準備完了', cls: 'open' },
+  closed: { label: '受付終了', cls: 'closed' },
+};
 function acceptsPlus(g) {
   const r = recvInfo();
   return !!r && r.phase === 'open' && !groupClosedAt(g);
@@ -512,34 +554,87 @@ function acceptsPlus(g) {
 function plusBlockedReason(g) {
   const r = recvInfo();
   if (!r) return '接続中です。少し待ってからタップしてください';
-  if (r.phase === 'before') return 'まだ受付開始前です';
-  if (r.phase === 'closed') return '受付は終了しました';
+  if (r.phase === 'before') return hqName() + 'はまだ受付開始前です';
+  if (r.phase === 'closed') return hqName() + 'の受付は終了しました';
   if (groupClosedAt(g)) return (S.gmap[g] ? S.gmap[g].short : '') + ' は受付終了しています';
   return '';
 }
 
 function renderRecv() {
   const r = recvInfo();
-  const pill = $('#phasePill'), bar = $('#recvBar');
-  if (!r || r.legacy) { pill.hidden = true; bar.hidden = true; return; }
+  const pill = $('#phasePill'), bar = $('#recvBar'), hq = $('#hqCard');
+  if (!r || r.legacy) { pill.hidden = true; bar.hidden = true; hq.hidden = true; return; }
   const label = { before: '受付前', open: '受付中', closed: '受付終了' }[r.phase];
   pill.className = 'phase ' + r.phase; pill.textContent = label; pill.hidden = false;
-  bar.hidden = false;
-  const sig = JSON.stringify(r);
+  bar.hidden = false; hq.hidden = false;
+  const sig = JSON.stringify(r) + hqName();
   if (bar.dataset.sig === sig) return;
   bar.dataset.sig = sig;
+
+  // 状況タブ：本部（高洲中央公園）の受付状態
+  hq.className = 'hq ' + r.phase;
+  hq.textContent = '';
+  hq.append(h('span', { class: 'hq-t' }, hqName() + ' ' + label),
+    h('span', { class: 'hq-s' },
+      r.phase === 'open' && r.openedAt ? hhmm(r.openedAt) + ' 開始' :
+      r.phase === 'closed' && r.closedAt ? hhmm(r.closedAt) + ' 終了' : '本部が受付を開始すると表示が変わります'));
+
+  // 本部受付タブ：上の案内
   bar.className = 'recvbar ' + r.phase;
   bar.textContent = '';
   if (r.phase === 'before') {
-    bar.append(h('div', null, h('b', null, '受付開始前です'), '本部が「受付開始」を押すと入力できます'),
+    bar.append(h('div', null, h('b', null, hqName() + ' 受付開始前'), '本部が「受付開始」を押すと入力できます'),
       h('button', { type: 'button', onclick: openAdmin }, '本部用：開始する'));
   } else if (r.phase === 'open') {
-    const n = Object.keys(r.groupsClosed || {}).length;
-    bar.append(h('span', null, '● 受付中' + (r.openedAt ? '（' + hhmm(r.openedAt) + ' 開始）' : '') + (n ? '　終了した自治会 ' + n : '')));
+    bar.append(h('span', null, '● ' + hqName() + ' 受付中' + (r.openedAt ? '（' + hhmm(r.openedAt) + ' 開始）' : '')));
   } else {
-    bar.append(h('div', null, h('b', null, '受付は終了しました'), r.closedAt ? hhmm(r.closedAt) + ' 終了' : ''),
+    bar.append(h('div', null, h('b', null, hqName() + ' 受付終了'), r.closedAt ? hhmm(r.closedAt) + ' 終了' : ''),
       h('button', { type: 'button', onclick: openAdmin }, '本部用：再開する'));
   }
+}
+
+// ---------- 自治会受付タブ ----------
+function buildGroupList() {
+  const list = $('#grpList');
+  list.textContent = '';
+  S.groups.forEach(g => {
+    const pill = h('span', { class: 'phase' }), time = h('span');
+    const mk = (cls, text, fn) => { const b = h('button', { class: 'gbtn ' + cls, type: 'button' }, text); b.addEventListener('click', fn); return b; };
+    const ready = mk('ready', '準備完了', () => groupAction('readyGroup', g.key));
+    const end = mk('end', '受付終了', () => askGroupEnd(g.key));
+    const yes = mk('yes', '終了する', () => groupAction('closeGroup', g.key));
+    const no = mk('no', 'やめる', () => { S.confirmG = null; renderCounts(); });
+    const reopen = mk('reopen', '受付を再開', () => groupAction('openGroup', g.key));
+    const back = h('button', { class: 'linkish', type: 'button' }, '準備中に戻す');
+    back.addEventListener('click', () => groupAction('unreadyGroup', g.key));
+    const row = h('div', { class: 'grow' },
+      h('div', null, h('div', { class: 'gname', text: g.short }), h('div', { class: 'gstat' }, pill, time)),
+      h('div', { class: 'acts' }, ready, end, yes, no, reopen),
+      back);
+    list.append(row);
+    S.grpEls[g.key] = { row, pill, time, ready, end, yes, no, reopen, back };
+  });
+}
+
+function renderGroupList() {
+  const r = recvInfo();
+  S.groups.forEach(g => {
+    const e = S.grpEls[g.key];
+    if (!e) return;
+    const st = groupStage(g.key), busy = S.grpBusy === g.key, conf = S.confirmG === g.key && st !== 'closed';
+    e.row.classList.toggle('closed', st === 'closed');
+    e.pill.className = 'phase ' + STAGE[st].cls;
+    e.pill.textContent = STAGE[st].label;
+    const ra = groupReadyAt(g.key), ca = groupClosedAt(g.key);
+    e.time.textContent = [ra ? hhmm(ra) + ' 準備完了' : '', ca ? hhmm(ca) + ' 受付終了' : ''].filter(Boolean).join('・');
+    e.ready.hidden = !r || conf || st !== 'prep';
+    e.end.hidden = !r || conf || st === 'closed';
+    e.yes.hidden = e.no.hidden = !conf;
+    e.reopen.hidden = st !== 'closed';
+    e.back.hidden = conf || st !== 'ready';
+    [e.ready, e.end, e.yes, e.no, e.reopen, e.back].forEach(b => { b.disabled = busy; });
+    e.yes.textContent = busy ? '処理中…' : '終了する';
+  });
 }
 
 // 管理者がデータをクリアしたら、この端末の履歴も消す
@@ -681,28 +776,17 @@ function buildGroups() {
     const ba = h('button', { class: 'tap a', type: 'button', 'aria-label': g.name + '　大人' }, la);
     bk.addEventListener('click', () => tap(g.key, 'k', bk));
     ba.addEventListener('click', () => tap(g.key, 'a', ba));
-    // 自治会ごとの受付終了（押すと確認ボタンに切り替わる）
-    const endBtn = h('button', { class: 'endbtn', type: 'button' }, '受付終了');
-    endBtn.addEventListener('click', () => askGroupEnd(g.key));
-    const yes = h('button', { class: 'danger', type: 'button' }, '終了する');
-    const no = h('button', { class: 'undo', type: 'button' }, 'やめる');
-    yes.addEventListener('click', () => groupAction('closeGroup', g.key));
-    no.addEventListener('click', () => { S.confirmG = null; renderCounts(); });
-    const cf = h('div', { class: 'rowconfirm' }, yes, no);
-    // 終了した自治会の表示と再開ボタン
-    const clText = h('span');
-    const reopen = h('button', { class: 'reopenbtn', type: 'button' }, '再開する');
-    reopen.addEventListener('click', () => groupAction('openGroup', g.key));
-    const cl = h('div', { class: 'closedLbl' }, clText, reopen);
+    // 自治会の受付が終了したときの表示（終了・再開は「自治会受付」タブで行う）
+    const cl = h('div', { class: 'closedLbl' });
     const row = h('div', { class: 'row' + (g.key === 'other' ? ' other' : '') },
-      h('div', null, h('div', { class: 'short', text: g.short }), h('div', { class: 'gc' }, ck, '　', ca), endBtn),
-      bk, ba, cf, cl);
+      h('div', null, h('div', { class: 'short', text: g.short }), h('div', { class: 'gc' }, ck, '　', ca)),
+      bk, ba, cl);
     rows.append(row);
-    S.rowEls[g.key] = { row, ck, ca, bk, ba, lk, la, cl, clText, endBtn, yes, no, reopen };
+    S.rowEls[g.key] = { row, ck, ca, bk, ba, lk, la, cl };
 
     const iK = h('i', { class: 'k' }), iA = h('i', { class: 'a' });
     const num = h('span', { class: 'num' }, '0'), sub = h('small');
-    const tag = h('span', { class: 'endtag' });
+    const tag = h('span', { class: 'phase' });
     bars.append(h('div', { class: 'gbar' },
       h('div', { class: 'nm' }, g.name, tag),
       h('div', { class: 'v' }, num, sub),
@@ -734,21 +818,18 @@ function renderCounts(fromTap) {
     const ok = acceptsPlus(g.key), closedAt = groupClosedAt(g.key);
     r.bk.disabled = S.minus ? v.k <= 0 : !ok;
     r.ba.disabled = S.minus ? v.a <= 0 : !ok;
-    const rv = recvInfo(), busy = S.grpBusy === g.key;
     r.row.classList.toggle('closed', !S.minus && !!closedAt);
-    r.row.classList.toggle('confirming', !S.minus && !closedAt && S.confirmG === g.key);
-    r.clText.textContent = closedAt ? '受付終了（' + hhmm(closedAt) + '）' : '';
-    r.endBtn.hidden = S.minus || !!closedAt || !rv || rv.legacy || rv.phase !== 'open';
-    r.endBtn.disabled = r.yes.disabled = r.reopen.disabled = busy;
-    r.reopen.textContent = busy ? '処理中…' : '再開する';
-    r.yes.textContent = busy ? '処理中…' : 'この自治会を終了';
-    b.tag.textContent = closedAt ? '終了' : '';
+    r.cl.textContent = closedAt ? '受付終了（' + hhmm(closedAt) + '）' : '';
+    const rv = recvInfo(), st = groupStage(g.key);
+    b.tag.hidden = !rv || !!rv.legacy;
+    b.tag.className = 'phase ' + STAGE[st].cls;
+    b.tag.textContent = STAGE[st].label;
     b.num.textContent = v.k + v.a;
     b.sub.textContent = '子ども' + v.k + '・大人' + v.a;
     b.iK.style.width = (v.k / max * 100) + '%';
     b.iA.style.width = (v.a / max * 100) + '%';
   });
-  renderFeed(); renderDock(); renderRecv(); renderAdminRecv();
+  renderFeed(); renderDock(); renderRecv(); renderGroupList(); renderAdminRecv();
 }
 
 function renderFeed() {
@@ -913,7 +994,7 @@ async function groupAction(action, g) {
     const st = await call('groupReception', auth(), action, g);
     applyState(st);
     const name = S.gmap[g] ? S.gmap[g].short : '';
-    toast(name + (action === 'closeGroup' ? ' の受付を終了しました' : ' の受付を再開しました'));
+    toast(name + ({ readyGroup: ' が準備完了しました', unreadyGroup: ' を準備中に戻しました', closeGroup: ' の受付を終了しました', openGroup: ' の受付を再開しました' })[action]);
     kickPoll(); // 自動のお知らせメッセージをすぐ取り込む
   } catch (e) {
     if (isAuth(e)) showSetup(errText(e));
@@ -1033,10 +1114,10 @@ async function onClear() {
 
 // ---------- タブ ----------
 function setTab(tab) {
-  if (!['reception', 'status', 'chat'].includes(tab)) tab = 'status';
+  if (!['status', 'reception', 'groups', 'chat'].includes(tab)) tab = 'status';
   if (tab !== 'reception' && S.minus) setMinus(false);
   S.tab = tab; store.set('tab', tab);
-  ['reception', 'status', 'chat'].forEach(t => { $('#v-' + t).hidden = t !== tab; });
+  ['status', 'reception', 'groups', 'chat'].forEach(t => { $('#v-' + t).hidden = t !== tab; });
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
   if (tab === 'chat') { $('#banner').hidden = true; markSeen(); renderChat(true); }
   renderBadge();
@@ -1139,6 +1220,7 @@ async function boot() {
   S.groups = S.cfg.groups || [];
   S.groups.forEach(g => { S.gmap[g.key] = g; });
   buildGroups();
+  buildGroupList();
   setTab(S.tab);
   renderCounts();
   renderChat(true);
@@ -1179,7 +1261,8 @@ const Mock = (function () {
     const counts = {};
     GROUPS.forEach(g => { counts[g.key] = { k: 0, a: 0 }; });
     db.rows.forEach(r => { if (counts[r.g]) counts[r.g][r.t] += r.n; });
-    if (!db.recv) db.recv = { phase: 'open', openedAt: Date.now() - 20 * 60000, closedAt: null, groupsClosed: {} };
+    if (!db.recv) db.recv = { phase: 'open', openedAt: Date.now() - 20 * 60000, closedAt: null, groupsReady: {}, groupsClosed: {} };
+    db.recv.groupsReady = db.recv.groupsReady || {};
     return { ver: db.ver, epoch: db.epoch || '0', recv: db.recv, counts, recent: db.rows.slice(-15) };
   }
   const accepts = g => db.recv && db.recv.phase === 'open' && !db.recv.groupsClosed[g];
@@ -1188,7 +1271,7 @@ const Mock = (function () {
   const fmt = ts => { const d = new Date(ts); return d.toLocaleDateString('ja-JP') + ' ' + d.toLocaleTimeString('ja-JP'); };
   const bump = () => { db.ver = Math.max(Date.now(), db.ver + 1); };
   return {
-    async getConfig() { await wait(); return { eventName: '高洲地区ハロウィンイベント', needPass: false, groups: GROUPS }; },
+    async getConfig() { await wait(); return { eventName: '高洲地区ハロウィンイベント', hqName: '本部（高洲中央公園）', needPass: false, groups: GROUPS }; },
     async sync(a, last) { await wait(); db = store.get('demo_db', db); return { state: state(), epoch: db.epoch || '0', msgs: db.msgs.filter(m => m.seq > last) }; },
     async record(a, items) {
       await wait();
@@ -1232,7 +1315,7 @@ const Mock = (function () {
     async adminClear(a, p) {
       await wait(); admin(p);
       db.rows = []; db.msgs = []; db.epoch = String(Date.now());
-      db.recv = { phase: 'before', openedAt: null, closedAt: null, groupsClosed: {} };
+      db.recv = { phase: 'before', openedAt: null, closedAt: null, groupsReady: {}, groupsClosed: {} };
       bump(); persist(); return state();
     },
     async groupReception(a, action, g) {
@@ -1245,8 +1328,11 @@ const Mock = (function () {
       state();
       const r = db.recv, now = Date.now(), grp = GROUPS.find(x => x.key === g);
       let text;
-      if (action === 'open') { text = r.phase === 'closed' ? '受付を再開しました' : '受付を開始しました'; r.phase = 'open'; r.openedAt = r.openedAt || now; r.closedAt = null; }
-      else if (action === 'close') { r.phase = 'closed'; r.closedAt = now; text = '受付を終了しました'; }
+      const hq = '本部（高洲中央公園）';
+      if (action === 'open') { text = hq + 'の受付を' + (r.phase === 'closed' ? '再開しました' : '開始しました'); r.phase = 'open'; r.openedAt = r.openedAt || now; r.closedAt = null; }
+      else if (action === 'close') { r.phase = 'closed'; r.closedAt = now; text = hq + 'の受付を終了しました'; }
+      else if (action === 'readyGroup') { r.groupsReady[g] = now; text = grp.short + ' が準備完了しました'; }
+      else if (action === 'unreadyGroup') { delete r.groupsReady[g]; text = grp.short + ' を準備中に戻しました'; }
       else if (action === 'closeGroup') { r.groupsClosed[g] = now; text = grp.short + ' の受付を終了しました'; }
       else { delete r.groupsClosed[g]; text = grp.short + ' の受付を再開しました'; }
       db.msgs.push({ seq: db.msgs.length + 1, ts: now, name: '本部（自動）', text: '【お知らせ】' + text + '（' + a.name + '）', dev: 'system' });
