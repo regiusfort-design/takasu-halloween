@@ -121,16 +121,29 @@ dl.faq{margin:14px 0}
 footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
 :focus-visible{outline:2px solid var(--pumpkin);outline-offset:2px}
 
+@page{size:A4;margin:14mm 14mm 16mm}
 @media print{
   :root{color-scheme:light}
-  body{background:#fff;font-size:11pt;padding:0}
-  .cover{background:#fff;color:#000;border-bottom:2px solid #000;padding:0 0 12px;margin:0}
-  .cover h1{color:#000}.cover p,.cover .ev{color:#333}.cover .open{display:none}
-  h2{break-after:avoid;margin-top:28px}
-  .shot,.note,table,.flow li{break-inside:avoid}
-  .shot{grid-template-columns:200px 1fr}
-  .roles{display:none}
+  body{background:#fff;font-size:10.5pt;line-height:1.7;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap{max-width:none;padding:0}
+  .cover{background:#fff;color:#000;border-bottom:2px solid var(--pumpkin-bg);padding:0 0 12px;margin:0}
+  .cover-in{max-width:none}
+  .cover h1{color:var(--pumpkin)}.cover p,.cover .ev{color:#444}.cover .open{display:none}
+  .print-url{display:block!important}
+  h2{break-after:avoid;margin-top:24px;font-size:17pt}
+  h3{break-after:avoid;font-size:12.5pt}
+  section{break-before:page}
+  section#start{break-before:auto}
+  .shot,.note,.tbl,table,.flow li,.faq dt,.faq dd{break-inside:avoid}
+  .shot{grid-template-columns:52mm 1fr;gap:6px 8mm;margin:10px 0}
+  .shot figure{max-width:none;margin:0}
+  .roles{grid-template-columns:repeat(4,1fr)}
+  .roles a{padding:8px 10px}
+  table{border:1px solid var(--line)}
+  a{color:inherit;text-decoration:none}
+  footer{margin-top:24px}
 }
+.print-url{display:none}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 </head>
@@ -144,6 +157,7 @@ footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-si
       <h1>運営アプリ 取扱説明書</h1>
       <p>運営スタッフ向け｜本部受付・各自治会の担当・主催者</p>
       <a class="open" href="./?openExternalBrowser=1">アプリを開く</a>
+      <p class="print-url">アプリ：https://regiusfort-design.github.io/takasu-halloween/　／　この説明書：…/takasu-halloween/manual.html</p>
     </div>
   </div>
 </header>
@@ -165,7 +179,7 @@ footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-si
     <a href="#start"><b>全員</b><span>1 はじめて開くとき<br>2 画面の見かた<br>5 連絡</span></a>
     <a href="#hq"><b>本部受付の担当</b><span>3 本部受付（人数を数える）</span></a>
     <a href="#groups"><b>各自治会の担当</b><span>4 自治会状況（準備完了・受付終了）</span></a>
-    <a href="#admin"><b>主催者（本部）</b><span>6 管理メニュー<br>7 当日の流れ</span></a>
+    <a href="#admin"><b>主催者（本部）</b><span>6 管理メニュー（受付・連絡の設定）<br>7 当日の流れ</span></a>
   </nav>
 
   <!-- 1 -->
@@ -173,12 +187,12 @@ footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-si
     <h2><span class="no">1</span>はじめて開くとき</h2>
     <p class="for">全員</p>
     <div class="shot">
-      <figure><img src="manual-setup.png" alt="名前と合言葉を入れる最初の画面" width="434" height="784" loading="lazy"><figcaption>最初の画面</figcaption></figure>
+      <figure><img src="manual-setup.png" alt="名前と合言葉を入れる最初の画面" width="434" height="784"><figcaption>最初の画面</figcaption></figure>
       <div class="txt">
         <ol>
           <li>LINE で配られた URL をタップします。
             <span class="url">https://regiusfort-design.github.io/takasu-halloween/?openExternalBrowser=1</span></li>
-          <li><b>あなたの名前・係</b> を入れます（例：「本部 受付A」「潮音の街 担当」）。メッセージの送信者名と受付の記録に使います。</li>
+          <li><b>自治会名＋お名前</b> を入れます（例：「潮音の街 山田」「レジアスフォート 鈴木」）。メッセージの送信者名と受付の記録に使います。</li>
           <li><b>合言葉</b> を入れます。合言葉は本部から別に連絡します。</li>
           <li><span class="ui k">はじめる</span> を押します。</li>
         </ol>
@@ -200,7 +214,7 @@ footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-si
     <h2><span class="no">2</span>画面の見かた</h2>
     <p class="for">全員</p>
     <div class="shot">
-      <figure><img src="manual-status.png" alt="状況タブの画面" width="434" height="784" loading="lazy"><figcaption>状況タブ</figcaption></figure>
+      <figure><img src="manual-status.png" alt="状況タブの画面" width="434" height="784"><figcaption>状況タブ</figcaption></figure>
       <div class="txt">
         <h3 style="margin-top:0">画面のいちばん上（どのタブでも表示）</h3>
         <ul>
@@ -224,7 +238,7 @@ footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-si
     <h2><span class="no">3</span>本部受付（人数を数える）</h2>
     <p class="for">本部（高洲中央公園）の受付担当</p>
     <div class="shot">
-      <figure><img src="manual-reception.png" alt="本部受付タブの画面" width="434" height="784" loading="lazy"><figcaption>本部受付タブ</figcaption></figure>
+      <figure><img src="manual-reception.png" alt="本部受付タブの画面" width="434" height="784"><figcaption>本部受付タブ</figcaption></figure>
       <div class="txt">
         <ol>
           <li>下の <b>本部受付</b> タブを開きます。</li>
@@ -250,7 +264,7 @@ footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-si
 
     <h3>まちがえて押したとき</h3>
     <div class="shot">
-      <figure><img src="manual-minus.png" alt="人数を減らすモードの画面" width="434" height="784" loading="lazy"><figcaption>人数を減らすモード</figcaption></figure>
+      <figure><img src="manual-minus.png" alt="人数を減らすモードの画面" width="434" height="784"><figcaption>人数を減らすモード</figcaption></figure>
       <div class="txt">
         <ol>
           <li>画面下の <span class="ui line">まちがえた人数を減らす</span> を押します。</li>
@@ -272,7 +286,7 @@ footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-si
     <h2><span class="no">4</span>自治会状況（準備完了・受付終了）</h2>
     <p class="for">各自治会の担当</p>
     <div class="shot">
-      <figure><img src="manual-groups.png" alt="自治会状況タブの画面" width="434" height="784" loading="lazy"><figcaption>自治会状況タブ</figcaption></figure>
+      <figure><img src="manual-groups.png" alt="自治会状況タブの画面" width="434" height="784"><figcaption>自治会状況タブ</figcaption></figure>
       <div class="txt">
         <ol>
           <li>下の <b>自治会状況</b> タブを開き、自分の自治会の行を探します。</li>
@@ -295,16 +309,27 @@ footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-si
     <h2><span class="no">5</span>連絡（メッセージ）</h2>
     <p class="for">全員</p>
     <div class="shot">
-      <figure><img src="manual-chat.png" alt="連絡タブの画面" width="434" height="784" loading="lazy"><figcaption>連絡タブ</figcaption></figure>
+      <figure><img src="manual-chat.png" alt="連絡タブの画面" width="434" height="784"><figcaption>連絡タブ</figcaption></figure>
       <div class="txt">
         <ul>
           <li>ここに書いたメッセージは、<b>スタッフ全員</b>に届きます。</li>
           <li>自分のメッセージは右側（オレンジ）、ほかの人のメッセージは左側に名前つきで表示されます。</li>
-          <li>入力欄の上のボタン（「了解です」「お菓子の補充お願いします」など）を押すと、よく使う文が入ります。そのあと <span class="ui k">送信</span> を押します。</li>
+          <li>入力欄の上のボタンを押すと、よく使う文が入ります。そのあと <span class="ui k">送信</span> を押します。
+            <br>「了解です」「本部受付が混んでいます」「迷子さん対応中」「●●自治会　本部へきてください」
+            <br>「●●自治会」の文は、●● の部分が選ばれた状態で入るので、そのまま自治会名を入力してください。</li>
           <li>ほかのタブを見ているときに新しいメッセージが来ると、画面の上にお知らせが出ます。「連絡」タブの赤い数字は未読の数です。</li>
           <li>送れなかったメッセージは「送信できませんでした。タップで再送」と出ます。タップすると送り直します。</li>
         </ul>
         <p>1通は300文字までです。</p>
+      </div>
+    </div>
+
+    <h3>LINE で連絡する日は</h3>
+    <div class="shot">
+      <figure><img src="manual-chatoff.png" alt="連絡タブを使用しないときの画面" width="434" height="784"><figcaption>連絡タブ（使用しないとき）</figcaption></figure>
+      <div class="txt">
+        <p>連絡をこのアプリで行うか、LINE で行うかは当日に本部が決めます。LINE で行う場合は、連絡タブに <b>「高洲ハロウィンLINEを使用してください」</b> と表示され、このアプリではメッセージを送れません。</p>
+        <p>その場合は、ふだんどおり <b>高洲ハロウィンLINE</b> で連絡してください。受付人数の共有（状況・本部受付・自治会状況タブ）は、これまでどおりアプリで行います。</p>
       </div>
     </div>
   </section>
@@ -316,7 +341,7 @@ footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-si
     <p class="lead">「状況」タブの一番下にある <span class="ui line">管理メニュー</span> を押し、<b>管理パスワード</b>を入れて開きます。管理パスワードは主催者だけが知っているもので、この説明書には書いていません。10分以内に10回まちがえると、しばらく使えなくなります。</p>
 
     <div class="shot">
-      <figure><img src="manual-admin.png" alt="管理メニューの画面（本部の受付）" width="434" height="784" loading="lazy"><figcaption>管理メニュー（上）</figcaption></figure>
+      <figure><img src="manual-admin.png" alt="管理メニューの画面（本部の受付）" width="434" height="784"><figcaption>管理メニュー（上）</figcaption></figure>
       <div class="txt">
         <h3 style="margin-top:0">本部（高洲中央公園）の受付</h3>
         <ul>
@@ -326,11 +351,17 @@ footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-si
         </ul>
         <p>開始・終了・再開をすると、「連絡」タブに全員へお知らせが届きます。終了を押した直後（2分以内）に届いた受付は、通信の遅れとして記録されます。</p>
         <p>受付前・受付終了のときは、「本部受付」タブの上に出る「本部用：開始する／再開する」からも管理メニューを開けます。</p>
+        <h3>連絡（メッセージ）</h3>
+        <ul>
+          <li><span class="ui end">使用しない（LINEにする）</span>：全員の連絡タブに「高洲ハロウィンLINEを使用してください」と表示され、アプリではメッセージを送れなくなります。</li>
+          <li><span class="ui k">このアプリの連絡を使用する</span>：連絡タブでメッセージを送れるように戻します。</li>
+        </ul>
+        <p>当日、連絡をアプリと LINE のどちらで行うか決めたら、ここで切り替えてください。最初は「使用する」になっています。</p>
       </div>
     </div>
 
     <div class="shot">
-      <figure><img src="manual-clear.png" alt="管理メニューの画面（CSV保存とデータクリア）" width="434" height="784" loading="lazy"><figcaption>管理メニュー（下）</figcaption></figure>
+      <figure><img src="manual-clear.png" alt="管理メニューの画面（CSV保存とデータクリア）" width="434" height="784"><figcaption>管理メニュー（下）</figcaption></figure>
       <div class="txt">
         <h3 style="margin-top:0">CSV で保存</h3>
         <p>「自治会別の集計」「受付ログ（全件）」「メッセージ」を、それぞれ Excel で開けるファイルに保存します。自治会別の集計には、本部の受付開始・終了時刻と、各自治会の準備完了・受付終了時刻も入ります。</p>
@@ -354,8 +385,9 @@ footer{margin-top:64px;padding-top:16px;border-top:1px solid var(--line);font-si
     <p class="for">主催者（本部）・全員</p>
     <ol class="flow">
       <li><b>リハーサルのあと、練習データを消す</b><span class="who">主催者：管理メニュー →「全データをクリア」</span></li>
-      <li><b>スタッフ全員がアプリを開き、名前と合言葉を入れる</b><span class="who">全員</span></li>
+      <li><b>スタッフ全員がアプリを開き、自治会名＋お名前と合言葉を入れる</b><span class="who">全員</span></li>
       <li><b>各自治会の準備ができたら「準備完了」</b><span class="who">各自治会の担当：自治会状況タブ</span></li>
+      <li><b>連絡をアプリで行うか、LINE で行うかを決める</b><span class="who">主催者：LINE にする場合は 管理メニュー →「使用しない（LINEにする）」</span></li>
       <li><b>本部の受付を開始する</b><span class="who">主催者：管理メニュー →「受付を開始する」</span></li>
       <li><b>来た人を自治会別に数える</b><span class="who">本部受付の担当：本部受付タブ／連絡は連絡タブで</span></li>
       <li><b>本部の受付を終了する</b><span class="who">主催者：管理メニュー →「受付を終了する…」</span></li>

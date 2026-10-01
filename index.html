@@ -176,6 +176,10 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
 .note{font-size:12px;color:var(--faint);margin:18px 0 0}
 
 /* 連絡（チャット） */
+.chatoff{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:24px 20px}
+.chatoff svg{width:48px;height:48px;fill:none;stroke:var(--muted);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.chatoff b{font-size:20px;line-height:1.5;color:var(--text);text-wrap:balance}
+.chatoff p{margin:0;font-size:13px;color:var(--muted);line-height:1.6}
 .msgs{flex:1;min-height:0;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:3px}
 .msg{display:flex;flex-direction:column;max-width:82%;align-self:flex-start}
 .msg.mine{align-self:flex-end;align-items:flex-end}
@@ -250,7 +254,7 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
 .phase-now{display:flex;align-items:center;gap:8px;font-size:14px;margin:0 0 10px}
 .phase-now .phase{font-size:12px}
 .phase-now small{color:var(--muted);font-size:12px}
-#phaseBtn{width:100%;margin-top:0}
+#phaseBtn,#chatBtn{width:100%;margin-top:0}
 .grp-ctl .gr{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
 .grp-ctl .gr small{display:block;color:var(--muted);font-size:11px}
 .grp-ctl .gr.is-closed small{color:var(--bad)}
@@ -324,6 +328,11 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
     </section>
 
     <section id="v-chat" class="view" aria-label="連絡" hidden>
+      <div id="chatOff" class="chatoff" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v11H10l-4.5 3.5v-3.5H4z"/></svg>
+        <b id="chatOffText">高洲ハロウィンLINEを使用してください</b>
+        <p>今回、このアプリの連絡（メッセージ）は使用していません。</p>
+      </div>
       <div id="msgList" class="msgs"></div>
       <div id="chips" class="chips"></div>
       <form id="composer" class="composer" autocomplete="off">
@@ -348,8 +357,8 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
   <form id="setupForm" class="setup-card" autocomplete="off">
     <div class="ev">高洲地区ハロウィンイベント</div>
     <h1>運営アプリ</h1>
-    <label for="nameIn">あなたの名前・係</label>
-    <input id="nameIn" maxlength="20" placeholder="例：受付 山田">
+    <label for="nameIn">自治会名＋お名前</label>
+    <input id="nameIn" maxlength="20" placeholder="例：潮音の街 山田">
     <p class="help">メッセージの送信者名と、受付の記録に使います。</p>
     <div id="passWrap" style="display:flex;flex-direction:column;gap:8px">
       <label for="passIn">合言葉</label>
@@ -390,6 +399,11 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
 
       <p class="help" style="margin:8px 0 0">自治会ごとの準備完了・受付終了は、「自治会状況」タブで行います。</p>
 
+      <h2>連絡（メッセージ）</h2>
+      <div class="phase-now">いまの設定 <span id="admChat" class="phase"></span></div>
+      <button id="chatBtn" class="primary" type="button">このアプリの連絡を使用する</button>
+      <p class="help" style="margin:8px 0 0" id="chatHelp"></p>
+
       <h2>CSVで保存</h2>
       <div class="adm-list">
         <button class="adm-btn" type="button" data-kind="summary">自治会別の集計<small>自治会ごとの子ども・大人・合計</small></button>
@@ -428,7 +442,8 @@ const HAS_GAS = !!(window.google && google.script && google.script.run);
 // デモモードはパソコンで index.html を直接開いたときだけ。本番では絶対に使わない
 const DEMO = !HAS_GAS && !API_URL && /^(file|data):$/.test(location.protocol);
 const TYPE_LABEL = { k: '子ども', a: '大人' };
-const QUICK = ['了解です', '受付が混んでいます', 'お菓子の補充お願いします', '迷子の対応中です', '本部に来てください'];
+// 連絡タブの定型文（●● は入力欄に入れたあと選択状態にするので、そのまま自治会名を打てる）
+const QUICK = ['了解です', '本部受付が混んでいます', '迷子さん対応中', '●●自治会　本部へきてください'];
 
 // ---------- 端末内の保存（この端末だけ） ----------
 const store = {
@@ -542,6 +557,17 @@ function applyState(st) {
   if (!st || !st.counts) return;
   checkEpoch(st.epoch);
   if (st.ver >= S.server.ver) { S.server = st; S.gotState = true; }
+}
+
+// ---------- 連絡（メッセージ）を使用するか（管理メニューで切り替え） ----------
+function chatOn() { return !(S.server.settings && S.server.settings.chat === false); }
+const chatOffText = () => (S.cfg && S.cfg.chatOffText) || '高洲ハロウィンLINEを使用してください';
+function renderChatMode() {
+  const on = chatOn();
+  $('#chatOff').hidden = on;
+  $('#chatOffText').textContent = chatOffText();
+  $('#msgList').hidden = $('#chips').hidden = $('#composer').hidden = !on;
+  if (!on) $('#banner').hidden = true;
 }
 
 // ---------- 受付の開始・終了 ----------
@@ -846,7 +872,7 @@ function renderCounts(fromTap) {
     b.iK.style.width = (v.k / max * 100) + '%';
     b.iA.style.width = (v.a / max * 100) + '%';
   });
-  renderFeed(); renderDock(); renderRecv(); renderGroupList(); renderAdminRecv();
+  renderFeed(); renderDock(); renderRecv(); renderGroupList(); renderChatMode(); renderBadge(); renderAdminRecv();
 }
 
 function renderFeed() {
@@ -884,7 +910,7 @@ function addMsgs(list) {
   if (!changed) return;
   S.msgs.sort((a, b) => a.seq - b.seq);
   if (S.tab === 'chat' && !document.hidden) markSeen();
-  else if (latest) showBanner(latest);
+  else if (latest && chatOn()) showBanner(latest);
   renderChat(); renderBadge();
 }
 
@@ -922,7 +948,7 @@ function renderChat(forceBottom) {
 function unreadCount() { return S.msgs.filter(m => m.seq > S.seenSeq && m.dev !== S.dev).length; }
 function renderBadge() {
   const n = unreadCount(), b = $('#badge');
-  b.hidden = !n || S.tab === 'chat';
+  b.hidden = !n || S.tab === 'chat' || !chatOn();
   b.textContent = n > 99 ? '99+' : n;
 }
 function markSeen() { S.seenSeq = S.lastSeq; store.set('seenSeq', S.seenSeq); renderBadge(); }
@@ -982,7 +1008,7 @@ function closeAdmin() { $('#admin').hidden = true; }
 function renderAdminRecv() {
   if ($('#admin').hidden || $('#admBody').hidden) return;
   const r = recvInfo() || { phase: 'before', groupsClosed: {} };
-  const sig = JSON.stringify(r) + '|' + !!S.admBusy + '|' + !$('#closeConfirm').hidden;
+  const sig = JSON.stringify(r) + '|' + chatOn() + '|' + !!S.admBusy + '|' + !$('#closeConfirm').hidden;
   if (S.admSig === sig) return; // 3秒ごとの更新で作り直すと押しにくいので、変化したときだけ描き直す
   S.admSig = sig;
   const ph = $('#admPhase');
@@ -995,6 +1021,34 @@ function renderAdminRecv() {
   btn.hidden = !$('#closeConfirm').hidden;
   if (r.phase === 'open') { btn.className = 'danger-outline'; btn.textContent = '受付を終了する…'; }
   else { btn.className = 'primary'; btn.textContent = r.phase === 'closed' ? '受付を再開する' : '受付を開始する'; }
+
+  // 連絡（メッセージ）の使用・不使用
+  const on = chatOn(), ac = $('#admChat'), cb = $('#chatBtn');
+  ac.className = 'phase ' + (on ? 'open' : 'closed');
+  ac.textContent = on ? '使用する' : '使用しない（LINE）';
+  cb.disabled = !!S.admBusy;
+  cb.className = on ? 'danger-outline' : 'primary';
+  cb.textContent = on ? '使用しない（LINEにする）' : 'このアプリの連絡を使用する';
+  $('#chatHelp').textContent = on
+    ? '使用しないにすると、全員の連絡タブに「' + chatOffText() + '」と表示され、メッセージを送れなくなります。'
+    : 'いまは全員の連絡タブに「' + chatOffText() + '」と表示されています。';
+}
+
+async function setChat(on) {
+  const err = $('#admErr');
+  err.hidden = true;
+  S.admBusy = true; renderAdminRecv();
+  try {
+    const st = await call('adminSetting', auth(), S.adminPass, 'chat', on);
+    applyState(st);
+    toast(on ? '連絡タブを使用するにしました' : '連絡タブを使用しない（LINE）にしました');
+  } catch (e) {
+    if (isApp(e) && /管理パスワード/.test(msgOf(e))) S.adminPass = null;
+    admError(e, err);
+  } finally {
+    S.admBusy = false;
+    renderCounts();
+  }
 }
 
 // 受付画面：自治会ごとの終了・再開（管理パスワード不要）
@@ -1229,6 +1283,7 @@ async function boot() {
   $('#phaseBtn').addEventListener('click', onPhaseBtn);
   $('#closeNo').addEventListener('click', () => { $('#closeConfirm').hidden = true; renderAdminRecv(); });
   $('#closeYes').addEventListener('click', () => recvAction('close'));
+  $('#chatBtn').addEventListener('click', () => setChat(!chatOn()));
   $('#meBtn').addEventListener('click', () => showSetup());
   $('#banner').addEventListener('click', () => setTab('chat'));
   $('#setupForm').addEventListener('submit', onSetup);
@@ -1246,7 +1301,14 @@ async function boot() {
   const chips = $('#chips');
   QUICK.forEach(q => {
     const c = h('button', { class: 'chip', type: 'button', text: q });
-    c.addEventListener('click', () => { const i = $('#msgInput'); i.value = i.value ? i.value + ' ' + q : q; i.focus(); });
+    c.addEventListener('click', () => {
+      const i = $('#msgInput');
+      const start = i.value ? i.value.length + 1 : 0;
+      i.value = i.value ? i.value + ' ' + q : q;
+      i.focus();
+      const p = q.indexOf('●●');
+      if (p >= 0) { try { i.setSelectionRange(start + p, start + p + 2); } catch (e) {} }
+    });
     chips.append(c);
   });
   setInterval(renderNet, 2000);
@@ -1301,15 +1363,16 @@ const Mock = (function () {
     db.rows.forEach(r => { if (counts[r.g]) counts[r.g][r.t] += r.n; });
     if (!db.recv) db.recv = { phase: 'open', openedAt: Date.now() - 20 * 60000, closedAt: null, groupsReady: {}, groupsClosed: {} };
     db.recv.groupsReady = db.recv.groupsReady || {};
-    return { ver: db.ver, epoch: db.epoch || '0', recv: db.recv, counts, recent: db.rows.slice(-15) };
+    return { ver: db.ver, epoch: db.epoch || '0', recv: db.recv, settings: { chat: chatOk() }, counts, recent: db.rows.slice(-15) };
   }
   const accepts = g => db.recv && db.recv.phase === 'open';
+  const chatOk = () => !(db.settings && db.settings.chat === false);
   // デモモードの管理パスワードは admin
   const admin = p => { if (p !== 'admin') throw new Error('[APP] 管理パスワードが違います（デモは admin）'); };
   const fmt = ts => { const d = new Date(ts); return d.toLocaleDateString('ja-JP') + ' ' + d.toLocaleTimeString('ja-JP'); };
   const bump = () => { db.ver = Math.max(Date.now(), db.ver + 1); };
   return {
-    async getConfig() { await wait(); return { eventName: '高洲地区ハロウィンイベント', hqName: '本部（高洲中央公園）', needPass: false, groups: GROUPS }; },
+    async getConfig() { await wait(); return { eventName: '高洲地区ハロウィンイベント', hqName: '本部（高洲中央公園）', chatOffText: '高洲ハロウィンLINEを使用してください', needPass: false, groups: GROUPS }; },
     async sync(a, last) { await wait(); db = store.get('demo_db', db); return { state: state(), epoch: db.epoch || '0', msgs: db.msgs.filter(m => m.seq > last) }; },
     async record(a, items) {
       await wait();
@@ -1331,6 +1394,7 @@ const Mock = (function () {
     },
     async postMessage(a, text, cid) {
       await wait();
+      if (!chatOk()) throw new Error('[APP] このアプリの連絡は使用していません。高洲ハロウィンLINEを使用してください');
       const m = { seq: db.msgs.length + 1, ts: Date.now(), name: a.name, text, dev: a.dev, cid };
       db.msgs.push(m); persist(); return { msg: m };
     },
@@ -1357,6 +1421,11 @@ const Mock = (function () {
       if (kind === 'all' || kind === 'messages') db.msgs = [];
       if (kind === 'all' || kind === 'status') db.recv = { phase: 'before', openedAt: null, closedAt: null, groupsReady: {}, groupsClosed: {} };
       if (kind !== 'status') db.epoch = String(Date.now());
+      bump(); persist(); return state();
+    },
+    async adminSetting(a, p, key, value) {
+      await wait(); admin(p);
+      db.settings = Object.assign({}, db.settings, { chat: !!value });
       bump(); persist(); return state();
     },
     async groupReception(a, action, g) {
