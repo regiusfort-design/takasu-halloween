@@ -215,7 +215,7 @@ h2{font-size:12px;color:var(--muted);letter-spacing:.1em;font-weight:600;margin:
 .banner b{flex:none;color:var(--pumpkin);font-size:13px}
 .banner span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
 @keyframes drop{from{transform:translateY(-12px);opacity:0}}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 132px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:30;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 132px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:60;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
 
 /* 初回設定 */
 .setup{position:fixed;inset:0;background:var(--bg);z-index:40;display:flex;overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 24px) 16px calc(env(safe-area-inset-bottom,0px) + 24px)}
@@ -680,24 +680,35 @@ function renderGroupList() {
     e.note.textContent = '※' + hqName() + 'は' + (r && r.phase === 'before' ? 'まだ受付前' : 'まだ受付中') +
       'です。ふだんは本部の受付終了のあとに押します。このまま終了してもかまいません。';
     [e.ready, e.end, e.yes, e.no, e.reopen, e.back].forEach(b => { b.disabled = busy; });
-    e.yes.textContent = busy ? '処理中…' : '終了する';
+    const act = busy ? S.grpBusyAction : '';
+    e.ready.textContent = act === 'readyGroup' ? '処理中…' : '準備完了';
+    e.yes.textContent = act === 'closeGroup' ? '処理中…' : '終了する';
+    e.reopen.textContent = act === 'openGroup' ? '処理中…' : '受付を再開';
+    e.back.textContent = act === 'unreadyGroup' ? '処理中…' : '準備中に戻す';
   });
 }
 
 // 管理者がデータをクリアしたら、この端末の履歴も消す
+// データクリアに気づいたときは true を返す
 function checkEpoch(epoch) {
-  if (epoch == null) return;
+  if (epoch == null) return false;
   epoch = String(epoch);
-  if (S.epoch === epoch) return;
+  if (S.epoch === epoch) return false;
   const first = S.epoch == null;
   S.epoch = epoch; store.set('epoch', epoch);
-  if (first) return;
+  if (first) return false;
+  // クリア前に押して、まだ送れていないタップは捨てる（サーバー側でも記録しない）
+  const fresh = e => !e.ep || e.ep === epoch;
+  S.pend = S.pend.filter(fresh);
+  S.queue = S.queue.filter(op => op === S.inflight || op.kind !== 'rec' || (op.items = op.items.filter(fresh)).length);
+  save();
   S.msgs = []; S.seqSet = new Set(); S.lastSeq = 0;
   S.seenSeq = 0; store.set('seenSeq', 0);
   S.server = { ver: 0, counts: {}, recent: [] };
   renderChat(true); renderBadge();
   toast('管理者がデータをクリアしました');
   setTimeout(kickPoll, 0);
+  return true;
 }
 
 // ---------- 受付タップ ----------
@@ -709,9 +720,9 @@ function tap(g, t, btn) {
     armMinusTimer();
   }
   const now = Date.now();
-  let e = S.pend.find(x => x.g === g && x.t === t && Math.sign(x.n) === s && now - x.ts < 2500);
+  let e = S.pend.find(x => x.g === g && x.t === t && Math.sign(x.n) === s && x.ep === S.epoch && now - x.ts < 2500);
   if (e) e.n += s;
-  else { e = { id: uid(), g, t, n: s, ts: now }; S.pend.push(e); }
+  else { e = { id: uid(), g, t, n: s, ts: now, ep: S.epoch }; S.pend.push(e); }
   save();
   scheduleFlush();
   renderCounts(true);
@@ -767,6 +778,7 @@ async function pump() {
       S.queue = S.queue.filter(x => x !== op);
       save(); applyState(st); S.retryDelay = 1000; setNet(true);
       if (st && st.rejected) toast('受付時間外のため ' + st.rejected + '名分は記録されませんでした');
+      else if (st && st.stale) toast('データクリア前に押した ' + st.stale + '名分は記録しませんでした');
     } catch (e) {
       if (isAuth(e)) { S.inflight = null; showSetup(errText(e)); break; }
       if (isApp(e)) {
@@ -793,8 +805,9 @@ async function poll(gen) {
     const sentSeq = S.lastSeq, sentEpoch = S.epoch;
     const r = await call('sync', auth(), sentSeq);
     setNet(true);
-    checkEpoch(r.epoch != null ? r.epoch : r.state && r.state.epoch);
-    if (!S.inflight && !S.queue.length) applyState(r.state);
+    const cleared = checkEpoch(r.epoch != null ? r.epoch : r.state && r.state.epoch);
+    // データクリア直後は送信待ちがあっても最新の状態を取り込む（受付状況が古いまま残らないように）
+    if (cleared || (!S.inflight && !S.queue.length)) applyState(r.state);
     if (S.epoch === sentEpoch || sentSeq === 0) addMsgs(r.msgs);
     if (!S.booted) {
       S.booted = true;
@@ -1057,12 +1070,12 @@ async function setChat(on) {
 function askGroupEnd(g) {
   S.confirmG = g;
   clearTimeout(S.confirmTimer);
-  S.confirmTimer = setTimeout(() => { if (S.confirmG === g) { S.confirmG = null; renderCounts(); } }, 8000);
+  S.confirmTimer = setTimeout(() => { if (S.confirmG === g && S.grpBusy !== g) { S.confirmG = null; renderCounts(); } }, 8000);
   renderCounts();
 }
 async function groupAction(action, g) {
-  S.confirmG = null;
-  S.grpBusy = g; renderCounts();
+  if (S.grpBusy) return; // 処理中は受け付けない
+  S.grpBusy = g; S.grpBusyAction = action; renderCounts();
   try {
     const st = await call('groupReception', auth(), action, g);
     applyState(st);
@@ -1073,6 +1086,7 @@ async function groupAction(action, g) {
     if (isAuth(e)) showSetup(errText(e));
     else toast(isApp(e) ? errText(e) : '接続できませんでした。もう一度お試しください');
   } finally {
+    S.confirmG = null; // 確認の表示は処理が終わるまで残す（「処理中…」が見えるように）
     S.grpBusy = null;
     renderCounts();
   }
@@ -1083,6 +1097,8 @@ async function recvAction(action, g) {
   err.hidden = true;
   if (S.admBusy) return; // ほかの操作の処理中は受け付けない
   S.admBusy = 'phase'; renderAdminRecv();
+  const yes = $('#closeYes'), no = $('#closeNo');
+  if (action === 'close') { yes.disabled = no.disabled = true; yes.textContent = '処理中…'; }
   try {
     const st = await call('adminReception', auth(), S.adminPass, action, g);
     applyState(st);
@@ -1094,6 +1110,7 @@ async function recvAction(action, g) {
     if (isApp(e) && /管理パスワード/.test(msgOf(e))) S.adminPass = null;
     admError(e, err);
   } finally {
+    yes.disabled = no.disabled = false; yes.textContent = '終了する';
     S.admBusy = false;
     renderCounts();
   }
@@ -1240,7 +1257,7 @@ async function onSetup(ev) {
   const name = $('#nameIn').value.replace(/\s+/g, ' ').trim().slice(0, 20);
   const pass = $('#passIn').value.trim();
   const err = $('#setupErr');
-  if (!name) { err.textContent = '名前か係名を入力してください'; err.hidden = false; return; }
+  if (!name) { err.textContent = '自治会名＋お名前を入力してください'; err.hidden = false; return; }
   const prev = S.me;
   S.me = { name, pass };
   const btn = $('#setupBtn');
