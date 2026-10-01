@@ -1008,7 +1008,7 @@ function closeAdmin() { $('#admin').hidden = true; }
 function renderAdminRecv() {
   if ($('#admin').hidden || $('#admBody').hidden) return;
   const r = recvInfo() || { phase: 'before', groupsClosed: {} };
-  const sig = JSON.stringify(r) + '|' + chatOn() + '|' + !!S.admBusy + '|' + !$('#closeConfirm').hidden;
+  const sig = JSON.stringify(r) + '|' + chatOn() + '|' + (S.admBusy || '') + '|' + !$('#closeConfirm').hidden;
   if (S.admSig === sig) return; // 3秒ごとの更新で作り直すと押しにくいので、変化したときだけ描き直す
   S.admSig = sig;
   const ph = $('#admPhase');
@@ -1017,18 +1017,19 @@ function renderAdminRecv() {
   $('#admPhaseTime').textContent =
     (r.openedAt ? hhmm(r.openedAt) + ' 開始' : '') + (r.phase === 'closed' && r.closedAt ? '・' + hhmm(r.closedAt) + ' 終了' : '');
   const btn = $('#phaseBtn');
-  btn.disabled = !!S.admBusy;
+  btn.disabled = S.admBusy === 'phase';
   btn.hidden = !$('#closeConfirm').hidden;
   if (r.phase === 'open') { btn.className = 'danger-outline'; btn.textContent = '受付を終了する…'; }
   else { btn.className = 'primary'; btn.textContent = r.phase === 'closed' ? '受付を再開する' : '受付を開始する'; }
+  if (S.admBusy === 'phase') btn.textContent = '処理中…';
 
   // 連絡（メッセージ）の使用・不使用
   const on = chatOn(), ac = $('#admChat'), cb = $('#chatBtn');
   ac.className = 'phase ' + (on ? 'open' : 'closed');
   ac.textContent = on ? '使用する' : '使用しない（LINE）';
-  cb.disabled = !!S.admBusy;
+  cb.disabled = S.admBusy === 'chat';
   cb.className = on ? 'danger-outline' : 'primary';
-  cb.textContent = on ? '使用しない（LINEにする）' : 'このアプリの連絡を使用する';
+  cb.textContent = S.admBusy === 'chat' ? '処理中…' : on ? '使用しない（LINEにする）' : 'このアプリの連絡を使用する';
   $('#chatHelp').textContent = on
     ? '使用しないにすると、全員の連絡タブに「' + chatOffText() + '」と表示され、メッセージを送れなくなります。'
     : 'いまは全員の連絡タブに「' + chatOffText() + '」と表示されています。';
@@ -1037,7 +1038,8 @@ function renderAdminRecv() {
 async function setChat(on) {
   const err = $('#admErr');
   err.hidden = true;
-  S.admBusy = true; renderAdminRecv();
+  if (S.admBusy) return; // ほかの操作の処理中は受け付けない
+  S.admBusy = 'chat'; renderAdminRecv();
   try {
     const st = await call('adminSetting', auth(), S.adminPass, 'chat', on);
     applyState(st);
@@ -1079,7 +1081,8 @@ async function groupAction(action, g) {
 async function recvAction(action, g) {
   const err = $('#admErr');
   err.hidden = true;
-  S.admBusy = true; renderAdminRecv();
+  if (S.admBusy) return; // ほかの操作の処理中は受け付けない
+  S.admBusy = 'phase'; renderAdminRecv();
   try {
     const st = await call('adminReception', auth(), S.adminPass, action, g);
     applyState(st);
@@ -1146,8 +1149,11 @@ function saveFile(filename, text) {
 
 async function onExport(btn) {
   const msg = $('#admCsvMsg'), err = $('#admErr');
+  if (S.exportBusy) return; // 保存中はほかの CSV ボタンを受け付けない（見た目は変えない）
+  S.exportBusy = true;
   msg.hidden = true; err.hidden = true;
-  document.querySelectorAll('.adm-btn[data-kind]').forEach(b => { b.disabled = true; });
+  const title = btn.firstChild, label = title.nodeValue;
+  btn.disabled = true; title.nodeValue = '保存中…';
   try {
     const r = await call('adminExport', auth(), S.adminPass, btn.dataset.kind);
     saveFile(r.filename, toCsv(r.rows));
@@ -1157,7 +1163,8 @@ async function onExport(btn) {
     if (isApp(e) && /管理パスワード/.test(msgOf(e))) S.adminPass = null;
     admError(e, err);
   } finally {
-    document.querySelectorAll('.adm-btn[data-kind]').forEach(b => { b.disabled = false; });
+    btn.disabled = false; title.nodeValue = label;
+    S.exportBusy = false;
   }
 }
 
